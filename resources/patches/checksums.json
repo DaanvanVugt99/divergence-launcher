@@ -1,0 +1,5 @@
+{
+  "baseRoms": [],
+  "patchedRoms": [],
+  "notes": "Checksums are intentionally unset in v0.1. Add canonical source and patched ROM hashes before implementing patching."
+}
