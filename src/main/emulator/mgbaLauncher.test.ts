@@ -61,6 +61,29 @@ describe('launchMgba', () => {
     await expect(launchPromise).rejects.toThrow('Could not launch mGBA: ENOENT');
     expect(childProcess.unref).not.toHaveBeenCalled();
   });
+
+  it('calls the exit callback when the launched mGBA process closes', async () => {
+    const childProcess = createMockChildProcess();
+    const onExit = vi.fn();
+    spawnMock.mockReturnValue(childProcess);
+
+    const launchPromise = launchMgba(
+      {
+        mgbaPath: '/Applications/mGBA.app/Contents/MacOS/mGBA',
+        romPath: '/Users/test/Divergence.gba',
+      },
+      { onExit },
+    );
+
+    childProcess.emit('spawn');
+    await launchPromise;
+
+    expect(onExit).not.toHaveBeenCalled();
+
+    childProcess.emit('close');
+
+    expect(onExit).toHaveBeenCalledOnce();
+  });
 });
 
 describe('createMgbaLaunchRequest', () => {

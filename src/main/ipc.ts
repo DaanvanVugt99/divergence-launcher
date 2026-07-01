@@ -9,6 +9,8 @@ import { detectMgba, resolveMgbaExecutablePath } from './emulator/mgbaDetector';
 import { createMgbaLaunchRequest, launchMgba } from './emulator/mgbaLauncher';
 import { getSettingsSnapshot, updateSettings, writeSettings } from './settings/settingsStore';
 
+let trackedMgbaLaunchCount = 0;
+
 const getSelectedSourceRomPath = (requestedPath: string) => {
   const selectedPath = getSettingsSnapshot().selectedSourceRomPath;
 
@@ -63,13 +65,23 @@ export const registerIpcHandlers = () => {
 
   ipcMain.handle(
     'launcher:updateSettings',
-    async (_event, settingsUpdate: { minimizeLauncherOnGameLaunch?: boolean }) => {
+    async (
+      _event,
+      settingsUpdate: {
+        minimizeLauncherOnGameLaunch?: boolean;
+        restoreLauncherOnGameExit?: boolean;
+      },
+    ) => {
       updateSettings((settings) => ({
         ...settings,
         minimizeLauncherOnGameLaunch:
           typeof settingsUpdate.minimizeLauncherOnGameLaunch === 'boolean'
             ? settingsUpdate.minimizeLauncherOnGameLaunch
             : settings.minimizeLauncherOnGameLaunch,
+        restoreLauncherOnGameExit:
+          typeof settingsUpdate.restoreLauncherOnGameExit === 'boolean'
+            ? settingsUpdate.restoreLauncherOnGameExit
+            : settings.restoreLauncherOnGameExit,
       }));
 
       return getLauncherStatus();
@@ -127,6 +139,7 @@ export const registerIpcHandlers = () => {
       mgbaPath: null,
       suppressMgbaAutoDetect: true,
       minimizeLauncherOnGameLaunch: true,
+      restoreLauncherOnGameExit: true,
       selectedSourceRomPath: null,
       lastSourceRomVerification: null,
       lastPatchedRom: null,
@@ -195,20 +208,55 @@ export const registerIpcHandlers = () => {
     const mgba = await detectMgba(settings.mgbaPath, {
       allowCommonLocations: !settings.suppressMgbaAutoDetect,
     });
+    const launcherWindow = BrowserWindow.fromWebContents(event.sender);
+    const shouldRestoreOnExit =
+      settings.minimizeLauncherOnGameLaunch && settings.restoreLauncherOnGameExit;
 
-    const result = await launchMgba(
-      createMgbaLaunchRequest({
-        mgba,
-        romLibrary,
-        expectedPatchedSha256: metadata.patchedRom.sha256,
-      }),
-    );
-
-    if (settings.minimizeLauncherOnGameLaunch) {
-      BrowserWindow.fromWebContents(event.sender)?.minimize();
+    if (shouldRestoreOnExit) {
+      trackedMgbaLaunchCount += 1;
     }
 
-    return result;
+    const restoreOnExit = () => {
+      trackedMgbaLaunchCount = Math.max(0, trackedMgbaLaunchCount - 1);
+
+      if (
+        trackedMgbaLaunchCount === 0 &&
+        launcherWindow &&
+        !launcherWindow.isDestroyed() &&
+        launcherWindow.isMinimized()
+      ) {
+        launcherWindow.restore();
+        launcherWindow.show();
+        launcherWindow.focus();
+      }
+    };
+
+    try {
+      const result = await launchMgba(
+        createMgbaLaunchRequest({
+          mgba,
+          romLibrary,
+          expectedPatchedSha256: metadata.patchedRom.sha256,
+        }),
+        shouldRestoreOnExit
+          ? {
+              onExit: restoreOnExit,
+            }
+          : undefined,
+      );
+
+      if (settings.minimizeLauncherOnGameLaunch) {
+        launcherWindow?.minimize();
+      }
+
+      return result;
+    } catch (error) {
+      if (shouldRestoreOnExit) {
+        trackedMgbaLaunchCount = Math.max(0, trackedMgbaLaunchCount - 1);
+      }
+
+      throw error;
+    }
   });
 
   ipcMain.handle('launcher:selectMgba', async () => {

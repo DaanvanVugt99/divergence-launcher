@@ -6,6 +6,7 @@ import {
   Gamepad2,
   HardDrive,
   Loader2,
+  Maximize2,
   Minimize2,
   Moon,
   Play,
@@ -165,6 +166,7 @@ export const App = () => {
   const mgbaReady = status?.mgba.status === 'found';
   const playReady = patchApplied && mgbaReady;
   const minimizeLauncherOnGameLaunch = status?.settings.minimizeLauncherOnGameLaunch ?? true;
+  const restoreLauncherOnGameExit = status?.settings.restoreLauncherOnGameExit ?? true;
   const tabCompletion: Record<LauncherScreen, boolean> = {
     play: playReady,
     rom: sourceVerified,
@@ -320,6 +322,19 @@ export const App = () => {
     }
   };
 
+  const updateRestoreOnGameExit = async (value: boolean) => {
+    setIsSavingSettings(true);
+
+    try {
+      const nextStatus = await window.launcher.updateSettings({
+        restoreLauncherOnGameExit: value,
+      });
+      setStatus(nextStatus);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   const copyDiagnostics = async () => {
     const lines = [
       'Divergence Launcher diagnostics',
@@ -412,6 +427,25 @@ export const App = () => {
                         />
                       </div>
                     </div>
+
+                    {minimizeLauncherOnGameLaunch ? (
+                      <div className="rounded-md border p-4">
+                        <div className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-card">
+                            <Maximize2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <h2 className="text-sm font-semibold">Restore after mGBA closes</h2>
+                          </div>
+                          <Switch
+                            checked={restoreLauncherOnGameExit}
+                            disabled={isSavingSettings}
+                            onCheckedChange={updateRestoreOnGameExit}
+                            aria-label="Restore launcher after mGBA closes"
+                          />
+                        </div>
+                      </div>
+                    ) : null}
 
                     <div className="rounded-md border p-4">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

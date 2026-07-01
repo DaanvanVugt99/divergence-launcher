@@ -17,6 +17,7 @@ export interface LauncherStatus {
     mgbaPath: string | null;
     suppressMgbaAutoDetect: boolean;
     minimizeLauncherOnGameLaunch: boolean;
+    restoreLauncherOnGameExit: boolean;
     selectedSourceRomPath: string | null;
     lastSourceRomVerification: {
       path: string;
@@ -94,6 +95,7 @@ export interface FileSelectionResult {
 
 export interface LauncherSettingsUpdate {
   minimizeLauncherOnGameLaunch?: boolean;
+  restoreLauncherOnGameExit?: boolean;
 }
 
 export interface LauncherApi {

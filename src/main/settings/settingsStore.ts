@@ -22,6 +22,7 @@ export interface LauncherSettings {
   mgbaPath: string | null;
   suppressMgbaAutoDetect: boolean;
   minimizeLauncherOnGameLaunch: boolean;
+  restoreLauncherOnGameExit: boolean;
   selectedSourceRomPath: string | null;
   lastSourceRomVerification: SourceRomVerificationMetadata | null;
   lastPatchedRom: LastPatchedRomMetadata | null;
@@ -31,6 +32,7 @@ const defaultSettings: LauncherSettings = {
   mgbaPath: null,
   suppressMgbaAutoDetect: false,
   minimizeLauncherOnGameLaunch: true,
+  restoreLauncherOnGameExit: true,
   selectedSourceRomPath: null,
   lastSourceRomVerification: null,
   lastPatchedRom: null,
@@ -47,6 +49,7 @@ const normalizeSettings = (value: unknown): LauncherSettings => {
     mgbaPath: typeof raw.mgbaPath === 'string' ? raw.mgbaPath : null,
     suppressMgbaAutoDetect: raw.suppressMgbaAutoDetect === true,
     minimizeLauncherOnGameLaunch: raw.minimizeLauncherOnGameLaunch !== false,
+    restoreLauncherOnGameExit: raw.restoreLauncherOnGameExit !== false,
     selectedSourceRomPath:
       typeof raw.selectedSourceRomPath === 'string' ? raw.selectedSourceRomPath : null,
     lastSourceRomVerification:

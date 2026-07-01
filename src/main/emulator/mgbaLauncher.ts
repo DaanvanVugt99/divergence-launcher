@@ -13,6 +13,10 @@ export interface MgbaLaunchResult {
   startedAt: string;
 }
 
+export interface MgbaLaunchOptions {
+  onExit?: () => void;
+}
+
 interface MgbaLaunchPreconditions {
   mgba: MgbaDetectionResult;
   romLibrary: RomLibraryState;
@@ -46,7 +50,10 @@ export const createMgbaLaunchRequest = ({
   };
 };
 
-export const launchMgba = async (request: MgbaLaunchRequest): Promise<MgbaLaunchResult> =>
+export const launchMgba = async (
+  request: MgbaLaunchRequest,
+  options: MgbaLaunchOptions = {},
+): Promise<MgbaLaunchResult> =>
   new Promise((resolve, reject) => {
     const child = spawn(request.mgbaPath, [request.romPath], {
       detached: true,
@@ -60,6 +67,10 @@ export const launchMgba = async (request: MgbaLaunchRequest): Promise<MgbaLaunch
         romPath: request.romPath,
         startedAt: new Date().toISOString(),
       });
+    });
+
+    child.once('close', () => {
+      options.onExit?.();
     });
 
     child.once('error', (error) => {
