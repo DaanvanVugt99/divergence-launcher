@@ -29,6 +29,18 @@ Generate the local patch artifact from a clean Emerald ROM and a local `pokeemer
 npm run generate:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>
 ```
 
+## Development Workflow
+
+Work on feature branches and merge through PRs into `main`. PRs and pushes to
+`main` run only CI checks: typecheck and unit tests.
+
+Release packaging is separate. macOS and Windows artifacts are built only from
+version tags like `v0.1.0`, or by manually running the release workflow in
+GitHub Actions.
+
+See [docs/release.md](docs/release.md) for release commands and packaging
+details.
+
 ## Legal
 
 Users must provide their own legally obtained Pokemon Emerald ROM. The launcher must never distribute the base ROM.

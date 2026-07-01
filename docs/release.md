@@ -43,6 +43,36 @@ Windows.
 When a tag matching `v*` is pushed, CI waits for both platform builds, then
 creates one GitHub Release and attaches both generated ZIPs.
 
+## Branch And Release Flow
+
+Use `main` as the stable development branch. Normal work should happen on a
+feature branch, then merge back through a pull request:
+
+```sh
+git switch main
+git pull upstream main
+git switch -c feature/my-change
+```
+
+Push the feature branch and open a PR into `main`. Pull requests and pushes to
+`main` run the cheap CI workflow only: install dependencies, typecheck, and unit
+tests.
+
+Release packaging is intentionally separate. macOS and Windows builds run only
+when a version tag is pushed, or when the release workflow is started manually
+from GitHub Actions:
+
+```sh
+git switch main
+git pull upstream main
+git tag v0.1.0
+git push upstream v0.1.0
+```
+
+Tag releases build the platform ZIPs and attach them to a GitHub Release.
+Manual release workflow runs are useful for testing packaged artifacts without
+creating a release tag.
+
 The macOS artifact verifier checks:
 
 - The ZIP exists.
