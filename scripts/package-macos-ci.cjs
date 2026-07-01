@@ -11,6 +11,7 @@ const outDir = path.join(repoRoot, 'out');
 const packagedDir = path.join(outDir, `${appName}-darwin-${arch}`);
 const packagedAppPath = path.join(packagedDir, `${appName}.app`);
 const stagingDir = path.join(outDir, 'ci-package-src');
+const packagerTmpDir = path.resolve(repoRoot, '..', '.divergence-launcher-electron-packager-tmp');
 const appIconPath = path.join(repoRoot, 'resources', 'icons', 'icon.icns');
 
 function applyMacAppIcon(appPath) {
@@ -63,6 +64,8 @@ function main() {
   console.log('Forge did not leave a packaged app; packaging .vite output directly.');
   assertViteOutputExists();
   createStagingDirectory();
+  fs.rmSync(packagerTmpDir, { recursive: true, force: true });
+  fs.mkdirSync(packagerTmpDir, { recursive: true });
 
   execFileSync(
     process.execPath,
@@ -79,6 +82,7 @@ function main() {
       '--app-bundle-id=dev.geef.divergence-launcher',
       '--app-category-type=public.app-category.games',
       `--extra-resource=${path.join(repoRoot, 'resources')}`,
+      `--tmpdir=${packagerTmpDir}`,
     ],
     { stdio: 'inherit' },
   );

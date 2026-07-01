@@ -73,6 +73,11 @@ public distribution.
 CI runs a direct Electron Packager fallback after Forge packaging. Forge is
 still used to build the Vite bundles, but if the hosted runner exits without a
 packaged `.app`, the fallback packages the already-built `.vite` output.
+Both Forge and the fallback use a stable temporary directory next to the repo,
+`../.divergence-launcher-electron-packager-tmp`, so hosted runner temp directory
+behavior cannot hide the final app move/copy step. The temp directory must stay
+outside the app source tree because Electron Packager copies the source into the
+temporary app bundle during packaging.
 
 ## Platform Notes
 

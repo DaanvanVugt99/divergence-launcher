@@ -36,7 +36,8 @@ jobs:
           pwd
           sw_vers
           uname -m
-          find out -maxdepth 5 -print
+          find out -maxdepth 5 -print || true
+          find ../.divergence-launcher-electron-packager-tmp -maxdepth 5 -print || true
 
       - name: Create macOS ZIP
         run: npm run zip:mac
