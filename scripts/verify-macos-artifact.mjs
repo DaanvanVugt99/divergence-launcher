@@ -1,15 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import packageJson from '../package.json' with { type: 'json' };
+import { appName, repoRoot, resolvePackagedAppPath, zipPath } from './macos-artifact-paths.mjs';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, '..');
-const appName = 'Divergence Launcher';
-const arch = 'arm64';
-const appDir = path.join(repoRoot, 'out', `${appName}-darwin-${arch}`, `${appName}.app`);
-const zipPath = path.join(repoRoot, 'out', 'make', 'zip', 'darwin', arch, `${appName}-darwin-${arch}-${packageJson.version}.zip`);
+const appDir = resolvePackagedAppPath();
 
 const requiredFiles = [
   zipPath,
