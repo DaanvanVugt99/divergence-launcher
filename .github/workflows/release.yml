@@ -135,6 +135,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mapfile -t artifacts < <(find release-artifacts -type f -name '*.zip' | sort)
+          release_flags=()
+
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            release_flags+=(--prerelease)
+          fi
 
           if [[ "${#artifacts[@]}" -eq 0 ]]; then
             echo "No release ZIP artifacts found." >&2
@@ -142,10 +147,12 @@ jobs:
           fi
 
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" "${release_flags[@]}"
             gh release upload "$GITHUB_REF_NAME" "${artifacts[@]}" --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
               "${artifacts[@]}" \
               --title "$GITHUB_REF_NAME" \
-              --generate-notes
+              --generate-notes \
+              "${release_flags[@]}"
           fi

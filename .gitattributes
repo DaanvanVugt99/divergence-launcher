@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+*.gba binary
+*.icns binary
+*.ico binary
+*.node binary
+*.png binary
+*.xdelta binary
