@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { formatPathForWrap } from '@/lib/formatPath';
 
 interface PatchStatusScreenProps {
   selectedRomPath: string | null;
@@ -89,7 +90,7 @@ export const PatchStatusScreen = ({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-md border bg-card p-4">
             <div className="text-sm font-medium">Source ROM</div>
-            <div className="mt-2 truncate text-sm text-muted-foreground">{selectedRomPath ?? 'No ROM selected'}</div>
+            <div className="mt-2 break-words text-sm text-muted-foreground">{formatPathForWrap(selectedRomPath, 'No ROM selected')}</div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge variant={sourceVerified ? 'default' : verification ? 'destructive' : 'secondary'}>
                 {sourceVerified ? 'Verified' : verification ? 'Rejected' : 'Unverified'}
@@ -101,7 +102,9 @@ export const PatchStatusScreen = ({
           </div>
           <div className="rounded-md border bg-card p-4">
             <div className="text-sm font-medium">Patch artifact</div>
-            <div className="mt-2 truncate text-sm text-muted-foreground">{status?.patchPlan.patchFilePath ?? 'Loading'}</div>
+            <div className="mt-2 break-words text-sm text-muted-foreground">
+              {formatPathForWrap(status?.patchPlan.patchFilePath, 'Loading')}
+            </div>
           </div>
         </div>
 

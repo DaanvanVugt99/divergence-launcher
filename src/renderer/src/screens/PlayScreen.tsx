@@ -3,6 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatPathForWrap } from '@/lib/formatPath';
 
 interface PlayScreenProps {
   patchedRomPath: string | null;
@@ -42,11 +43,45 @@ export const PlayScreen = ({
   onSelectMgbaSetup,
 }: PlayScreenProps) => {
   const readyForNativePlay = patchApplied && mgbaReady;
-  const missingSteps = [
-    sourceVerified ? null : 'ROM verification',
-    patchApplied ? null : 'Divergence patch',
-    mgbaReady ? null : 'mGBA setup',
-  ].filter(Boolean);
+  const nextStep = (() => {
+    if (!hasSourceRom) {
+      return {
+        title: 'Choose a source ROM',
+        description: 'Select your legally obtained Pokemon Emerald ROM to start local setup.',
+        buttonLabel: 'Set up ROM',
+        onSelect: onSelectPatchedRomSetup,
+      };
+    }
+
+    if (!sourceVerified) {
+      return {
+        title: 'Verify the source ROM',
+        description: 'Confirm the selected ROM matches the supported Pokemon Emerald checksum.',
+        buttonLabel: 'Verify ROM',
+        onSelect: onSelectPatchedRomSetup,
+      };
+    }
+
+    if (!patchApplied) {
+      return {
+        title: 'Apply the Divergence patch',
+        description: 'Create and verify the managed patched ROM stored by the launcher.',
+        buttonLabel: 'Open patch',
+        onSelect: onSelectPatchedRomSetup,
+      };
+    }
+
+    if (!mgbaReady) {
+      return {
+        title: 'Set up mGBA',
+        description: 'Select an installed mGBA executable before launching native play.',
+        buttonLabel: 'Set up mGBA',
+        onSelect: onSelectMgbaSetup,
+      };
+    }
+
+    return null;
+  })();
 
   return (
     <Card>
@@ -72,14 +107,20 @@ export const PlayScreen = ({
           </AlertDescription>
         </Alert>
 
-        {!readyForNativePlay && missingSteps.length > 0 ? (
+        {!readyForNativePlay && nextStep ? (
           <div className="rounded-md border bg-card p-4">
-            <div className="flex items-start gap-3">
-              <CircleAlert className="mt-0.5 h-4 w-4 text-muted-foreground" />
-              <div>
-                <div className="text-sm font-medium">Needs setup</div>
-                <div className="mt-1 text-sm text-muted-foreground">{missingSteps.join(', ')}</div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <CircleAlert className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">{nextStep.title}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{nextStep.description}</div>
+                </div>
               </div>
+              <Button type="button" variant="outline" onClick={nextStep.onSelect} className="shrink-0 gap-2">
+                {nextStep.buttonLabel}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         ) : null}
@@ -146,7 +187,7 @@ export const PlayScreen = ({
           <div className="mt-4 grid gap-3">
             <div className="grid gap-1 md:grid-cols-[120px_minmax(0,1fr)]">
               <span className="text-muted-foreground">Patched ROM</span>
-              <span className="truncate">{hasPatchedRom ? patchedRomPath : 'Not prepared'}</span>
+              <span className="break-words">{formatPathForWrap(hasPatchedRom ? patchedRomPath : null, 'Not prepared')}</span>
             </div>
             <div className="grid gap-1 md:grid-cols-[120px_minmax(0,1fr)]">
               <span className="text-muted-foreground">ROM hash</span>
@@ -154,7 +195,7 @@ export const PlayScreen = ({
             </div>
             <div className="grid gap-1 md:grid-cols-[120px_minmax(0,1fr)]">
               <span className="text-muted-foreground">mGBA</span>
-              <span className="truncate">{mgbaPath ?? 'Not configured'}</span>
+              <span className="break-words">{formatPathForWrap(mgbaPath, 'Not configured')}</span>
             </div>
           </div>
         </details>

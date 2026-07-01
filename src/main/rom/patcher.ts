@@ -12,7 +12,7 @@ import {
 import { sha256File } from './hash';
 import { getManagedPatchedRomPath } from './romLibrary';
 
-const require = createRequire(import.meta.url);
+const require = createRequire(__filename);
 
 export type PatchFileStatus = 'ready' | 'missing' | 'invalid-metadata';
 export type RomVerificationStatus = 'valid' | 'invalid';

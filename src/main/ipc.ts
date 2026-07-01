@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, dialog, ipcMain, shell } from 'electron';
+import { app, clipboard, dialog, ipcMain, shell } from 'electron';
 import { getLauncherPaths } from './paths';
 import { applyPatch, getPatchMetadata, getPatchPlan, verifySourceRom } from './rom/patcher';
 import { getManagedPatchedRomPath, getRomLibraryState } from './rom/romLibrary';
@@ -37,6 +37,9 @@ export const registerIpcHandlers = () => {
     return {
       app: {
         version: app.getVersion(),
+        platform: process.platform,
+        arch: process.arch,
+        isPackaged: app.isPackaged,
       },
       paths,
       settings,
@@ -200,5 +203,9 @@ export const registerIpcHandlers = () => {
     }
 
     await shell.openExternal(url);
+  });
+
+  ipcMain.handle('launcher:copyText', async (_event, text: string) => {
+    clipboard.writeText(text);
   });
 };

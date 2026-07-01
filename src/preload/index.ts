@@ -12,6 +12,7 @@ const launcherApi: LauncherApi = {
   selectMgba: () => ipcRenderer.invoke('launcher:selectMgba'),
   launchMgba: () => ipcRenderer.invoke('launcher:launchMgba'),
   openExternal: (url: string) => ipcRenderer.invoke('launcher:openExternal', url),
+  copyText: (text: string) => ipcRenderer.invoke('launcher:copyText', text),
 };
 
 contextBridge.exposeInMainWorld('launcher', launcherApi);

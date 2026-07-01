@@ -78,6 +78,8 @@ jobs:
           fi
 
       - name: Build and verify release artifact
+        env:
+          ENABLE_ELECTRON_FUSES: true
         run: npm run release:mac
 
       - name: Upload macOS ZIP

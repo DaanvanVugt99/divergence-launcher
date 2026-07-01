@@ -33,12 +33,18 @@ The generated app and ZIP are written under `out/`.
 ZIP creation with PowerShell `Compress-Archive`, and the Windows artifact
 verifier.
 
-## CI Build
+## CI Checks
 
-GitHub Actions builds macOS arm64 and Windows x64 ZIPs on pushes, pull
-requests, tags, and manual workflow dispatches. The workflow uses Node 22 LTS,
-the `macos-26` Apple Silicon runner for macOS, and a Windows runner for
-Windows.
+GitHub Actions runs the cheap CI workflow on pull requests, pushes to `main`,
+and manual workflow dispatches. This workflow installs dependencies, typechecks,
+and runs unit tests.
+
+## Release Build
+
+GitHub Actions builds macOS arm64 and Windows x64 ZIPs only when a tag matching
+`v*` is pushed, or when the release workflow is started manually. The workflow
+uses Node 22 LTS, the `macos-26` Apple Silicon runner for macOS, and a Windows
+runner for Windows.
 
 When a tag matching `v*` is pushed, CI waits for both platform builds, then
 creates one GitHub Release and attaches both generated ZIPs.
@@ -101,13 +107,18 @@ Before sharing a development build:
 
 1. Open the packaged app from `out/`.
 2. Reset launcher data with the debug reset action.
-3. Select a clean Pokemon Emerald ROM.
-4. Verify the source ROM.
-5. Apply the Divergence patch.
-6. Confirm the managed patched ROM verifies as ready.
-7. Configure or detect mGBA.
-8. Launch mGBA from the Play tab.
-9. Export the patched ROM and confirm the exported file exists.
+3. Confirm the Play tab points to ROM setup.
+4. Select a clean Pokemon Emerald ROM.
+5. Confirm the Play tab points to ROM verification until the source is verified.
+6. Verify the source ROM.
+7. Confirm the Play tab points to patch setup.
+8. Apply the Divergence patch.
+9. Confirm the managed patched ROM verifies as ready.
+10. Confirm the Play tab points to mGBA setup if mGBA is not configured.
+11. Configure or detect mGBA.
+12. Launch mGBA from the Play tab.
+13. Export the patched ROM and confirm the exported file exists.
+14. Copy diagnostics from About/settings and confirm the selected source ROM path is not included.
 
 ## GitHub Release Tags
 

@@ -66,6 +66,14 @@
 - Publish both platform ZIPs from one tag-triggered GitHub Release job.
 - Keep Linux as a later target until its packaging and emulator expectations are tested.
 
+## v0.8 First-Run Polish
+
+- Make the Play tab clearly explain the next required setup action.
+- Keep details available without making the primary Play surface feel busy.
+- Add privacy-conscious diagnostic copy for support and tester reports.
+- Keep debug reset inside About/settings until a fuller settings surface exists.
+- Improve manual smoke-test notes around the first-run flow.
+
 ## Future Online Bridge
 
 - Define a small mailbox protocol.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, CircleX, Gamepad2, HardDrive, Info, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
+import { CheckCircle2, CircleX, Copy, Gamepad2, HardDrive, Info, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
 import type { LauncherStatus, SourceRomVerificationResult } from '../../preload/launcherApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,7 @@ export const App = () => {
   const [launchStatus, setLaunchStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isLaunchingMgba, setIsLaunchingMgba] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [diagnosticsStatus, setDiagnosticsStatus] = useState<string | null>(null);
 
   const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference;
 
@@ -266,6 +267,34 @@ export const App = () => {
     setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
+  const copyDiagnostics = async () => {
+    const lines = [
+      'Divergence Launcher diagnostics',
+      `Version: ${status?.app.version ?? 'unknown'}`,
+      `Platform: ${status?.app.platform ?? 'unknown'} ${status?.app.arch ?? ''}`.trim(),
+      `Packaged: ${status?.app.isPackaged ? 'yes' : 'no'}`,
+      `Theme: ${themePreference} (${resolvedTheme})`,
+      `Source ROM selected: ${sourceRomPath ? 'yes' : 'no'}`,
+      `Source ROM verified: ${sourceVerified ? 'yes' : 'no'}`,
+      `Patch resources: ${status?.patchPlan.status ?? 'unknown'}`,
+      `Patched ROM ready: ${patchApplied ? 'yes' : 'no'}`,
+      `mGBA status: ${status?.mgba.status ?? 'unknown'}`,
+      `mGBA source: ${status?.mgba.source ?? 'unknown'}`,
+      `Last error: ${
+        launchStatus?.type === 'error'
+          ? launchStatus.message
+          : patchError ?? 'none'
+      }`,
+    ];
+
+    try {
+      await window.launcher.copyText(lines.join('\n'));
+      setDiagnosticsStatus('Copied diagnostics');
+    } catch {
+      setDiagnosticsStatus('Could not copy diagnostics');
+    }
+  };
+
   const appShell = (
     <TooltipProvider>
       <main className="min-h-screen bg-background text-foreground">
@@ -306,9 +335,21 @@ export const App = () => {
                         <span className="text-muted-foreground">Version</span>
                         <Badge variant="secondary">{status?.app.version ?? '0.1.0'}</Badge>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-muted-foreground">Build</span>
-                        <span className="font-medium">GEEF</span>
+                    </div>
+
+                    <div className="rounded-md border p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h2 className="text-sm font-semibold">Diagnostics</h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Copy app, platform, and setup status for tester reports. The selected source ROM path is not included.
+                          </p>
+                          {diagnosticsStatus ? <p className="mt-2 text-xs text-muted-foreground">{diagnosticsStatus}</p> : null}
+                        </div>
+                        <Button type="button" variant="outline" onClick={copyDiagnostics} className="shrink-0 gap-2">
+                          <Copy className="h-4 w-4" />
+                          Copy
+                        </Button>
                       </div>
                     </div>
 
@@ -405,7 +446,7 @@ export const App = () => {
                   onExportPatchedRom={exportPatchedRom}
                   onOpenPatchedRomFolder={openPatchedRomFolder}
                   onLaunchMgba={launchMgba}
-                  onSelectPatchedRomSetup={() => setScreen(sourceRomPath ? 'patch' : 'rom')}
+                  onSelectPatchedRomSetup={() => setScreen(sourceVerified ? 'patch' : 'rom')}
                   onSelectMgbaSetup={() => setScreen('mgba')}
                 />
               </TabsContent>

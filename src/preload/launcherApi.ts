@@ -1,6 +1,9 @@
 export interface LauncherStatus {
   app: {
     version: string;
+    platform: string;
+    arch: string;
+    isPackaged: boolean;
   };
   paths: {
     appDataDir: string;
@@ -99,6 +102,7 @@ export interface LauncherApi {
   selectMgba: () => Promise<FileSelectionResult | null>;
   launchMgba: () => Promise<MgbaLaunchResult>;
   openExternal: (url: string) => Promise<void>;
+  copyText: (text: string) => Promise<void>;
 }
 
 declare global {
