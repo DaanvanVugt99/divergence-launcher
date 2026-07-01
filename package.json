@@ -11,9 +11,11 @@
   },
   "scripts": {
     "prepare:package-resources": "node scripts/prepare-native-xdelta.mjs",
+    "clean:package:mac": "node scripts/clean-package-output.mjs darwin arm64",
+    "clean:package:win": "node scripts/clean-package-output.mjs win32 x64",
     "prepackage": "npm run prepare:package-resources",
-    "prepackage:mac": "npm run prepare:package-resources",
-    "prepackage:win": "npm run prepare:package-resources",
+    "prepackage:mac": "npm run prepare:package-resources && npm run clean:package:mac",
+    "prepackage:win": "npm run prepare:package-resources && npm run clean:package:win",
     "premake": "npm run prepare:package-resources",
     "premake:mac": "npm run prepare:package-resources",
     "start": "electron-forge start",
