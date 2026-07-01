@@ -43,6 +43,23 @@ export interface PatchResult {
 }
 
 type XdeltaModule = typeof import('@chainsafe/xdelta3-node');
+const maxSourceRomBytes = 64 * 1024 * 1024;
+
+const assertSupportedSourceRomFile = (sourceRomPath: string) => {
+  if (!fs.existsSync(sourceRomPath)) {
+    throw new Error('Selected ROM file does not exist.');
+  }
+
+  const sourceStat = fs.statSync(sourceRomPath);
+
+  if (!sourceStat.isFile()) {
+    throw new Error('Selected ROM path is not a file.');
+  }
+
+  if (sourceStat.size > maxSourceRomBytes) {
+    throw new Error('Selected ROM file is too large to be a supported Game Boy Advance ROM.');
+  }
+};
 
 const getXdelta = (): XdeltaModule => {
   try {
@@ -130,9 +147,7 @@ export const verifySourceRom = async (
   paths: LauncherPaths,
   sourceRomPath: string,
 ): Promise<SourceRomVerificationResult> => {
-  if (!fs.existsSync(sourceRomPath)) {
-    throw new Error('Selected ROM file does not exist.');
-  }
+  assertSupportedSourceRomFile(sourceRomPath);
 
   const metadata = getPatchMetadata(paths);
   const sha256 = await sha256File(sourceRomPath);

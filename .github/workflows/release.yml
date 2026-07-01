@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -107,6 +107,8 @@ jobs:
         run: npm ci
 
       - name: Build and verify release artifact
+        env:
+          ENABLE_ELECTRON_FUSES: true
         run: npm run release:win
 
       - name: Upload Windows ZIP
@@ -123,6 +125,8 @@ jobs:
       - build-macos-arm64
       - build-windows-x64
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Download release artifacts

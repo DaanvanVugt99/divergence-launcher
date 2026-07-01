@@ -9,6 +9,16 @@ import { detectMgba, resolveMgbaExecutablePath } from './emulator/mgbaDetector';
 import { createMgbaLaunchRequest, launchMgba } from './emulator/mgbaLauncher';
 import { getSettingsSnapshot, updateSettings, writeSettings } from './settings/settingsStore';
 
+const getSelectedSourceRomPath = (requestedPath: string) => {
+  const selectedPath = getSettingsSnapshot().selectedSourceRomPath;
+
+  if (!selectedPath || path.resolve(selectedPath) !== path.resolve(requestedPath)) {
+    throw new Error('Select a source ROM before verifying or patching it.');
+  }
+
+  return selectedPath;
+};
+
 export const registerIpcHandlers = () => {
   ipcMain.handle('launcher:getStatus', async () => {
     const paths = getLauncherPaths();
@@ -108,13 +118,13 @@ export const registerIpcHandlers = () => {
   ipcMain.handle('launcher:verifySelectedRom', async (_event, romPath: string) => {
     const paths = getLauncherPaths();
 
-    return verifySourceRom(paths, romPath);
+    return verifySourceRom(paths, getSelectedSourceRomPath(romPath));
   });
 
   ipcMain.handle('launcher:patchSelectedRom', async (_event, romPath: string) => {
     const paths = getLauncherPaths();
 
-    return applyPatch(paths, romPath);
+    return applyPatch(paths, getSelectedSourceRomPath(romPath));
   });
 
   ipcMain.handle('launcher:exportPatchedRom', async () => {

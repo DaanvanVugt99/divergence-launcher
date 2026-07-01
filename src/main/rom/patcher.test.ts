@@ -6,7 +6,7 @@ import { encodeSync } from '@chainsafe/xdelta3-node';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LauncherPaths } from '../paths';
 import type { LauncherSettings } from '../settings/settingsStore';
-import { applyPatch } from './patcher';
+import { applyPatch, verifySourceRom } from './patcher';
 
 vi.mock('../settings/settingsStore', () => ({
   updateSettings: vi.fn((updater: (settings: LauncherSettings) => LauncherSettings) => {
@@ -108,5 +108,16 @@ describe('applyPatch', () => {
 
     await expect(applyPatch(paths, sourcePath)).rejects.toThrow(/Patched ROM checksum/i);
     expect(fs.readFileSync(outputPath, 'utf8')).toBe('previous output');
+  });
+});
+
+describe('verifySourceRom', () => {
+  it('rejects source ROM files that are too large for a GBA ROM', async () => {
+    const oversizedRomPath = path.join(tempDir, 'oversized.gba');
+
+    fs.writeFileSync(oversizedRomPath, '');
+    fs.truncateSync(oversizedRomPath, 65 * 1024 * 1024);
+
+    await expect(verifySourceRom(paths, oversizedRomPath)).rejects.toThrow(/too large/i);
   });
 });
