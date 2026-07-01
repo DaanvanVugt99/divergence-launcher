@@ -53,6 +53,11 @@
 - Verify signed artifacts with `codesign` and notarized artifacts with `stapler`.
 - Keep unsigned local development builds working when Apple credentials are absent.
 
+### Deferred TODO
+
+- Enroll a personal Apple Developer account and configure signing/notarization
+  secrets before public macOS distribution.
+
 ## Future Online Bridge
 
 - Define a small mailbox protocol.

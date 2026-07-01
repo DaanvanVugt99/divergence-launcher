@@ -75,6 +75,10 @@ machine.
 Signed and notarized builds require an Apple Developer Program membership, a
 Developer ID Application certificate, and App Store Connect API key credentials.
 
+TODO: Signing/notarization is wired but deferred until a personal Apple Developer
+account is available. Until then, release artifacts are unsigned development
+builds.
+
 Configure these GitHub Actions secrets:
 
 - `APPLE_DEVELOPER_ID_CERTIFICATE_BASE64`: Base64-encoded `.p12` export of the
