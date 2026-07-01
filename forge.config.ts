@@ -13,7 +13,44 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const appIconPath = path.resolve(process.cwd(), 'resources/icons/icon');
 const appIconFilePath = `${appIconPath}.icns`;
+const macEntitlementsPath = path.resolve(process.cwd(), 'resources/entitlements/darwin.plist');
 const productName = 'Divergence Launcher';
+const macSigningIdentity = process.env.APPLE_SIGNING_IDENTITY;
+const macSigningKeychain = process.env.APPLE_KEYCHAIN_PATH;
+const appleApiKey = process.env.APPLE_API_KEY_PATH;
+const appleApiKeyId = process.env.APPLE_API_KEY_ID;
+const appleApiIssuer = process.env.APPLE_API_ISSUER;
+
+function getMacSigningConfig() {
+  if (!macSigningIdentity) {
+    return {};
+  }
+
+  const notarizationValues = [appleApiKey, appleApiKeyId, appleApiIssuer];
+  const hasPartialNotarization = notarizationValues.some(Boolean) && !notarizationValues.every(Boolean);
+
+  if (hasPartialNotarization) {
+    throw new Error('Apple notarization is partially configured. Set APPLE_API_KEY_PATH, APPLE_API_KEY_ID, and APPLE_API_ISSUER together.');
+  }
+
+  return {
+    osxSign: {
+      identity: macSigningIdentity,
+      keychain: macSigningKeychain,
+      hardenedRuntime: true,
+      entitlements: macEntitlementsPath,
+    },
+    ...(notarizationValues.every(Boolean)
+      ? {
+          osxNotarize: {
+            appleApiKey,
+            appleApiKeyId,
+            appleApiIssuer,
+          },
+        }
+      : {}),
+  };
+}
 
 function applyMacAppIcon(buildPath: string, platform: string): void {
   if (platform !== 'darwin') {
@@ -38,6 +75,7 @@ const config: ForgeConfig = {
     executableName: 'divergence-launcher',
     icon: appIconPath,
     extraResource: ['resources'],
+    ...getMacSigningConfig(),
     afterComplete: [
       (buildPath, _electronVersion, platform, _arch, callback) => {
         try {

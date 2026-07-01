@@ -1,7 +1,7 @@
 # Release Checklist
 
-v0.4 supports a macOS-first unsigned development package. The launcher is not
-ready for a public signed/notarized release yet.
+v0.6 supports macOS arm64 release artifacts, optional Apple Developer ID signing
+and notarization, and tag-triggered GitHub Releases.
 
 ## Local macOS Build
 
@@ -19,9 +19,12 @@ deterministic ZIP creation with `ditto`, and the artifact verifier.
 
 ## CI Build
 
-GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, and manual
-workflow dispatches. The workflow uses Node 22 LTS on the `macos-26` Apple
-Silicon runner and uploads the generated ZIP as an artifact.
+GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, tags, and
+manual workflow dispatches. The workflow uses Node 22 LTS on the `macos-26`
+Apple Silicon runner and uploads the generated ZIP as an artifact.
+
+When a tag matching `v*` is pushed, CI also creates a GitHub Release and attaches
+the generated ZIP.
 
 The CI artifact verifier checks:
 
@@ -32,6 +35,8 @@ The CI artifact verifier checks:
 - The patch checksum metadata is included.
 - The darwin-arm64 xdelta native addon is included.
 - The xdelta native addon license is included.
+- Signed builds pass `codesign --verify`.
+- Notarized builds pass `xcrun stapler validate`.
 
 ## Manual Smoke Test
 
@@ -47,27 +52,51 @@ Before sharing a development build:
 8. Launch mGBA from the Play tab.
 9. Export the patched ROM and confirm the exported file exists.
 
+## GitHub Release Tags
+
+To create a release artifact from CI:
+
+```sh
+git tag v0.1.0
+git push upstream v0.1.0
+```
+
+The tag workflow creates the ZIP, verifies it, uploads it as an Actions artifact,
+and publishes a GitHub Release.
+
 ## Unsigned macOS Builds
 
-Current builds are unsigned. macOS Gatekeeper may warn when opening a ZIP or app
-shared outside this machine. Public release builds should add Developer ID
-signing and notarization before distribution.
+If Apple signing secrets are absent, CI and local builds remain unsigned. macOS
+Gatekeeper may warn when opening an unsigned ZIP or app shared outside this
+machine.
 
 ## Signing And Notarization
 
-Signing and notarization are not enabled yet because they require an Apple
-Developer account and private credentials.
+Signed and notarized builds require an Apple Developer Program membership, a
+Developer ID Application certificate, and App Store Connect API key credentials.
 
-When ready, the release workflow should add:
+Configure these GitHub Actions secrets:
 
-- A Developer ID Application certificate stored as a GitHub Actions secret.
-- The certificate password stored as a GitHub Actions secret.
-- Apple notarization credentials stored as GitHub Actions secrets.
-- A signing step before ZIP creation.
-- A notarization and staple step before artifact upload.
+- `APPLE_DEVELOPER_ID_CERTIFICATE_BASE64`: Base64-encoded `.p12` export of the
+  Developer ID Application certificate.
+- `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD`: Password used when exporting the
+  `.p12`.
+- `APPLE_SIGNING_IDENTITY`: Full codesign identity, for example
+  `Developer ID Application: Your Name (TEAMID)`.
+- `APPLE_API_KEY_BASE64`: Base64-encoded App Store Connect `.p8` API key.
+- `APPLE_API_KEY_ID`: App Store Connect API key ID.
+- `APPLE_API_ISSUER`: App Store Connect issuer UUID.
 
-Until then, CI artifacts are suitable for development testing, not polished
-public distribution.
+To create the base64 secret values locally:
+
+```sh
+base64 -i DeveloperIDApplication.p12 | tr -d '\n' | pbcopy
+base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
+```
+
+The certificate secret enables signing. The API key secrets enable notarization
+and stapling. If any notarization value is set, all three API key secrets must be
+set together.
 
 ## Platform Notes
 

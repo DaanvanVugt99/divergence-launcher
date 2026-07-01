@@ -6,6 +6,7 @@ The launcher is a companion app. It does not include a Pokemon Emerald ROM, does
 
 See [docs/roadmap.md](docs/roadmap.md) for planned milestones.
 See [docs/release.md](docs/release.md) for local packaging notes.
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## Development
 

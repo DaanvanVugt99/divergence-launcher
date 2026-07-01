@@ -44,6 +44,15 @@
 - Document macOS signing and notarization requirements.
 - Move debug reset into an About/settings dialog instead of keeping it in the top bar.
 
+## v0.6 Release Polish
+
+- Add a changelog.
+- Add tag-triggered GitHub Release publishing for macOS ZIP artifacts.
+- Add explicit CI permissions and concurrency.
+- Add optional Apple Developer ID signing and notarization in CI.
+- Verify signed artifacts with `codesign` and notarized artifacts with `stapler`.
+- Keep unsigned local development builds working when Apple credentials are absent.
+
 ## Future Online Bridge
 
 - Define a small mailbox protocol.

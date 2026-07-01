@@ -42,6 +42,18 @@ function assertZipContains(zipFilePath, expectedEntry) {
   }
 }
 
+function verifyCodeSignature(appPath) {
+  execFileSync('codesign', ['--verify', '--deep', '--strict', '--verbose=2', appPath], {
+    stdio: 'inherit',
+  });
+}
+
+function verifyStapledNotarization(appPath) {
+  execFileSync('xcrun', ['stapler', 'validate', appPath], {
+    stdio: 'inherit',
+  });
+}
+
 for (const filePath of requiredFiles) {
   assertFileExists(filePath);
 }
@@ -62,5 +74,13 @@ assertZipContains(zipPath, `${appName}.app/Contents/Resources/icon.icns`);
 assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/patches/divergence-v0.1.xdelta`);
 assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/xdelta/native/xdelta3-node.darwin-arm64.node`);
 assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/xdelta/native/LICENSE.xdelta3-node`);
+
+if (process.env.APPLE_SIGNING_IDENTITY) {
+  verifyCodeSignature(appDir);
+}
+
+if (process.env.APPLE_API_KEY_PATH) {
+  verifyStapledNotarization(appDir);
+}
 
 console.log('macOS artifact verification passed.');
