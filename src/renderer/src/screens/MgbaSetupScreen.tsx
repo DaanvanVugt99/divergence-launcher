@@ -10,7 +10,6 @@ interface MgbaSetupScreenProps {
   selectedMgbaPath: string | null;
   onChooseMgba: () => void;
   onOpenDownload: () => void;
-  onContinue: () => void;
 }
 
 export const MgbaSetupScreen = ({
@@ -18,7 +17,6 @@ export const MgbaSetupScreen = ({
   selectedMgbaPath,
   onChooseMgba,
   onOpenDownload,
-  onContinue,
 }: MgbaSetupScreenProps) => {
   const mgbaPath = selectedMgbaPath ?? detectedMgbaPath;
 
@@ -48,17 +46,14 @@ export const MgbaSetupScreen = ({
         <div className="rounded-md border bg-muted/40 p-4">
           <div className="text-sm font-medium">Distribution policy</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            The launcher detects or asks for mGBA in v0.1. Bundling mGBA is kept out of the default path until license and packaging work is explicit.
+            The launcher detects or asks for mGBA in v0.2. Bundling mGBA is kept out of the default path until license and packaging work is explicit.
           </p>
         </div>
       </CardContent>
-      <CardFooter className="justify-between gap-3">
+      <CardFooter className="justify-start gap-3">
         <Button type="button" variant="outline" onClick={onOpenDownload} className="gap-2">
           <Download className="h-4 w-4" />
           Download mGBA
-        </Button>
-        <Button type="button" onClick={onContinue} disabled={!mgbaPath}>
-          Continue
         </Button>
       </CardFooter>
     </Card>

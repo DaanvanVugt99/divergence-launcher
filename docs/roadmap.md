@@ -15,7 +15,7 @@
 - Select source ROM.
 - Compute checksum.
 - Validate approved base ROM checksum.
-- Apply bundled xdelta patch.
+- Apply local xdelta patch.
 - Verify patched output checksum.
 - Store patched ROM under app data.
 - Add open-folder and export actions.
@@ -31,7 +31,7 @@
 ## v0.4 Packaging
 
 - Package macOS, Windows, and Linux builds.
-- Include platform xdelta binaries outside ASAR where needed.
+- Include xdelta native runtime support outside ASAR where needed.
 - Add license notices for bundled tools.
 - Document install and troubleshooting.
 

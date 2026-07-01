@@ -1,5 +1,25 @@
 {
-  "baseRoms": [],
-  "patchedRoms": [],
-  "notes": "Checksums are intentionally unset in v0.1. Add canonical source and patched ROM hashes before implementing patching."
+  "patchVersion": "v0.1",
+  "patchFileName": "divergence-v0.1.xdelta",
+  "sourceRoms": [
+    {
+      "id": "pokemon-emerald-usa-europe",
+      "label": "Pokemon Emerald (USA, Europe)",
+      "sha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af"
+    }
+  ],
+  "patchedRom": {
+    "id": "divergence-v0.1",
+    "label": "Pokemon Emerald Rogue: Divergence v0.1",
+    "sha256": "7ade3ef606dfbe8b1c7ef88028b386f13ca132462a5a72935bda83a303a12d1a",
+    "outputFileName": "Pokemon Emerald Rogue Divergence.gba"
+  },
+  "generatedFrom": {
+    "sourceRomLabel": "Pokemon Emerald (USA, Europe)",
+    "rogueRepo": "pokeemerald-rogue",
+    "rogueCommit": "b98ce1f35047cbefc360333641eafba8b2892dab",
+    "rogueDirty": false,
+    "buildCommand": "make -j10 rom RELEASE=1",
+    "generatedAt": "2026-07-01T08:07:27.361Z"
+  }
 }

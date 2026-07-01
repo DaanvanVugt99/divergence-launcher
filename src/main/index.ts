@@ -7,8 +7,15 @@ if (started) {
   app.quit();
 }
 
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+let mainWindow: BrowserWindow | null = null;
+
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
+
 const createWindow = () => {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1120,
     height: 760,
     minWidth: 920,
@@ -23,6 +30,10 @@ const createWindow = () => {
     },
   });
 
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
@@ -32,19 +43,37 @@ const createWindow = () => {
   }
 };
 
-app.whenReady().then(() => {
-  registerIpcHandlers();
-  createWindow();
-});
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
+const showMainWindow = () => {
+  if (!mainWindow) {
     createWindow();
+    return;
   }
-});
+
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+
+  mainWindow.show();
+  mainWindow.focus();
+};
+
+if (hasSingleInstanceLock) {
+  app.on('second-instance', () => {
+    showMainWindow();
+  });
+
+  app.whenReady().then(() => {
+    registerIpcHandlers();
+    createWindow();
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
+
+  app.on('activate', () => {
+    showMainWindow();
+  });
+}

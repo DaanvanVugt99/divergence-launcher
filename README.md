@@ -18,6 +18,13 @@ Useful checks:
 ```sh
 npm run typecheck
 npm test
+npm run package
+```
+
+Generate the local patch artifact from a clean Emerald ROM and a local `pokeemerald-rogue` checkout:
+
+```sh
+npm run generate:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>
 ```
 
 ## Legal

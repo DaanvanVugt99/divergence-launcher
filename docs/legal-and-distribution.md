@@ -21,6 +21,10 @@ v0.1 assumes mGBA is installed externally. The launcher may detect common instal
 
 mGBA is MPL-2.0 licensed. Bundling may be possible later, but it requires explicit license compliance, notices, packaging work, and an update policy.
 
-## Third-Party Binaries
+## Third-Party Native Code
 
-Bundled xdelta binaries require platform-specific packaging and license notices. They should be kept outside the application ASAR if execution from inside the archive is unreliable on a target platform.
+v0.2 uses `@chainsafe/xdelta3-node` for local xdelta support. The package is Apache-2.0 licensed.
+
+Packaged builds copy the platform native addon outside the application ASAR under `resources/xdelta/native`. Keep the package license notice with published builds.
+
+The launcher must still fail clearly if a target platform build does not include a usable xdelta native addon.

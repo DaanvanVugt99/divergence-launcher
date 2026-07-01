@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Gamepad2, HardDrive, Moon, Play, Settings2, Sun } from 'lucide-react';
-import type { LauncherStatus } from '../../preload/launcherApi';
-import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, CircleX, Gamepad2, HardDrive, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
+import type { LauncherStatus, SourceRomVerificationResult } from '../../preload/launcherApi';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,8 +37,16 @@ export const App = () => {
     return 'system';
   });
   const [status, setStatus] = useState<LauncherStatus | null>(null);
+  const [hasLoadedStatus, setHasLoadedStatus] = useState(false);
   const [selectedRomPath, setSelectedRomPath] = useState<string | null>(null);
   const [selectedMgbaPath, setSelectedMgbaPath] = useState<string | null>(null);
+  const [romVerification, setRomVerification] = useState<SourceRomVerificationResult | null>(null);
+  const [isVerifyingRom, setIsVerifyingRom] = useState(false);
+  const [isPatching, setIsPatching] = useState(false);
+  const [patchError, setPatchError] = useState<string | null>(null);
+  const [patchSuccess, setPatchSuccess] = useState<string | null>(null);
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
 
   const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference;
 
@@ -65,21 +72,108 @@ export const App = () => {
     window.localStorage.setItem('divergence-theme-preference', themePreference);
   }, [resolvedTheme, themePreference]);
 
+  const refreshStatus = async (options?: { replaceLocalState?: boolean }) => {
+    const nextStatus = await window.launcher.getStatus();
+    const storedVerification = nextStatus.settings.lastSourceRomVerification;
+
+    setStatus(nextStatus);
+    setSelectedRomPath((current) => (options?.replaceLocalState ? nextStatus.romLibrary.sourceRomPath : current ?? nextStatus.romLibrary.sourceRomPath));
+    setSelectedMgbaPath((current) => (options?.replaceLocalState ? nextStatus.mgba.path : current ?? nextStatus.mgba.path));
+    setRomVerification((current) => {
+      if (current) {
+        return current;
+      }
+
+      if (!storedVerification || storedVerification.path !== nextStatus.romLibrary.sourceRomPath) {
+        return null;
+      }
+
+      const matchedProfile =
+        nextStatus.patchPlan.expectedBaseRoms.find((profile) => profile.id === storedVerification.matchedProfileId) ?? null;
+
+      return {
+        path: storedVerification.path,
+        sha256: storedVerification.sha256,
+        status: storedVerification.status,
+        matchedProfile,
+        expectedProfiles: nextStatus.patchPlan.expectedBaseRoms,
+      };
+    });
+  };
+
   useEffect(() => {
-    window.launcher.getStatus().then(setStatus).catch(() => setStatus(null));
+    refreshStatus()
+      .catch(() => setStatus(null))
+      .finally(() => setHasLoadedStatus(true));
   }, []);
 
   const effectiveMgbaPath = selectedMgbaPath ?? status?.mgba.path ?? null;
-  const setupProgress = useMemo(() => {
-    const completed = [selectedRomPath, status?.patchPlan.status, effectiveMgbaPath].filter(Boolean).length;
-    return Math.round((completed / 3) * 100);
-  }, [effectiveMgbaPath, selectedRomPath, status?.patchPlan.status]);
-
+  const sourceRomPath = selectedRomPath ?? status?.romLibrary.sourceRomPath ?? null;
+  const sourceVerified =
+    romVerification?.status === 'valid' ||
+    Boolean(
+      status?.settings.lastSourceRomVerification?.status === 'valid' &&
+        status.settings.lastSourceRomVerification.path === sourceRomPath,
+    );
+  const patchApplied = Boolean(
+    status?.romLibrary.hasPatchedRom &&
+      status.romLibrary.lastPatchedSha256 &&
+      status.romLibrary.lastPatchedSha256 === status.patchPlan.expectedPatchedRom.sha256,
+  );
+  const mgbaReady = status?.mgba.status === 'found';
+  const playReady = patchApplied && mgbaReady;
+  const tabCompletion: Record<LauncherScreen, boolean> = {
+    play: playReady,
+    rom: sourceVerified,
+    patch: patchApplied,
+    mgba: mgbaReady,
+  };
   const chooseRom = async () => {
     const result = await window.launcher.selectRom();
     if (result) {
       setSelectedRomPath(result.path);
-      setScreen('patch');
+      setRomVerification(null);
+      setPatchError(null);
+    }
+  };
+
+  const verifyRom = async (romPath = sourceRomPath) => {
+    if (!romPath) {
+      return;
+    }
+
+    setIsVerifyingRom(true);
+    setPatchError(null);
+
+    try {
+      const result = await window.launcher.verifySelectedRom(romPath);
+      setRomVerification(result);
+      await refreshStatus();
+    } catch (error) {
+      setPatchError(error instanceof Error ? error.message : 'ROM verification failed.');
+    } finally {
+      setIsVerifyingRom(false);
+    }
+  };
+
+  const patchRom = async () => {
+    if (!sourceRomPath) {
+      setPatchError('Select a source ROM before patching.');
+      return;
+    }
+
+    setIsPatching(true);
+    setPatchError(null);
+    setPatchSuccess(null);
+
+    try {
+      const result = await window.launcher.patchSelectedRom(sourceRomPath);
+      setPatchSuccess(`Patched ROM verified: ${result.patchedSha256}`);
+      await refreshStatus();
+    } catch (error) {
+      setPatchError(error instanceof Error ? error.message : 'Patch failed.');
+    } finally {
+      setIsPatching(false);
     }
   };
 
@@ -87,7 +181,53 @@ export const App = () => {
     const result = await window.launcher.selectMgba();
     if (result) {
       setSelectedMgbaPath(result.path);
-      setScreen('play');
+      await refreshStatus();
+    }
+  };
+
+  const exportPatchedRom = async () => {
+    setExportStatus(null);
+
+    try {
+      const result = await window.launcher.exportPatchedRom();
+      setExportStatus(result ? `Exported to ${result.path}` : 'Export canceled');
+    } catch (error) {
+      setExportStatus(error instanceof Error ? error.message : 'Export failed.');
+    }
+  };
+
+  const openPatchedRomFolder = async () => {
+    try {
+      await window.launcher.openPatchedRomFolder();
+    } catch (error) {
+      setExportStatus(error instanceof Error ? error.message : 'Could not open patched ROM folder.');
+    }
+  };
+
+  const resetLauncherData = async () => {
+    const confirmed = window.confirm(
+      'Reset launcher data? This clears selected paths, verification state, mGBA configuration, and the managed patched ROM. It will not delete your original ROM file.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsResetting(true);
+
+    try {
+      await window.launcher.resetData();
+      window.localStorage.clear();
+      setThemePreference('system');
+      setSelectedRomPath(null);
+      setSelectedMgbaPath(null);
+      setRomVerification(null);
+      setPatchError(null);
+      setPatchSuccess(null);
+      setExportStatus(null);
+      await refreshStatus({ replaceLocalState: true });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -95,7 +235,7 @@ export const App = () => {
     setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
-  return (
+  const appShell = (
     <TooltipProvider>
       <main className="min-h-screen bg-background text-foreground">
         <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-5">
@@ -112,9 +252,22 @@ export const App = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={status?.mgba.status === 'found' ? 'default' : 'secondary'} className="h-8 px-3">
-                {status?.mgba.status === 'found' ? 'mGBA detected' : 'v0.1 shell'}
-              </Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={resetLauncherData}
+                    disabled={isResetting}
+                    className="h-8 w-8"
+                    aria-label="Reset launcher data"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Reset launcher data</TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button type="button" variant="outline" size="icon" onClick={toggleTheme} className="h-8 w-8" aria-label="Toggle theme">
@@ -133,7 +286,12 @@ export const App = () => {
               {screens.map((item) => (
                 <TabsTrigger key={item.value} value={item.value} className="gap-2">
                   <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <span>{item.label}</span>
+                  {tabCompletion[item.value] ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <CircleX className="h-3.5 w-3.5 text-red-500/70 dark:text-red-400/80" />
+                  )}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -141,19 +299,25 @@ export const App = () => {
             <div className="mt-5 flex-1">
               <TabsContent value="rom" className="mt-0">
                 <RomSelectionScreen
-                  selectedRomPath={selectedRomPath}
-                  status={status}
-                  setupProgress={setupProgress}
+                  selectedRomPath={sourceRomPath}
                   onChooseRom={chooseRom}
-                  onContinue={() => setScreen('patch')}
+                  onVerifyRom={() => verifyRom()}
+                  verification={romVerification}
+                  sourceVerified={sourceVerified}
+                  isVerifying={isVerifyingRom}
                 />
               </TabsContent>
               <TabsContent value="patch" className="mt-0">
                 <PatchStatusScreen
-                  selectedRomPath={selectedRomPath}
+                  selectedRomPath={sourceRomPath}
                   status={status}
-                  onBack={() => setScreen('rom')}
-                  onContinue={() => setScreen('mgba')}
+                  verification={romVerification}
+                  sourceVerified={sourceVerified}
+                  isPatching={isPatching}
+                  patchError={patchError}
+                  patchSuccess={patchSuccess}
+                  onVerifyRom={() => verifyRom()}
+                  onPatchRom={patchRom}
                 />
               </TabsContent>
               <TabsContent value="mgba" className="mt-0">
@@ -162,20 +326,64 @@ export const App = () => {
                   selectedMgbaPath={selectedMgbaPath}
                   onChooseMgba={chooseMgba}
                   onOpenDownload={() => window.launcher.openExternal('https://mgba.io/downloads.html')}
-                  onContinue={() => setScreen('play')}
                 />
               </TabsContent>
               <TabsContent value="play" className="mt-0">
                 <PlayScreen
                   patchedRomPath={status?.romLibrary.patchedRomPath ?? null}
+                  hasPatchedRom={status?.romLibrary.hasPatchedRom ?? false}
+                  patchedSha256={status?.romLibrary.lastPatchedSha256 ?? null}
                   mgbaPath={effectiveMgbaPath}
-                  onBack={() => setScreen('mgba')}
+                  hasSourceRom={Boolean(sourceRomPath)}
+                  sourceVerified={sourceVerified}
+                  patchApplied={patchApplied}
+                  mgbaReady={mgbaReady}
+                  exportStatus={exportStatus}
+                  onExportPatchedRom={exportPatchedRom}
+                  onOpenPatchedRomFolder={openPatchedRomFolder}
+                  onSelectPatchedRomSetup={() => setScreen(sourceRomPath ? 'patch' : 'rom')}
+                  onSelectMgbaSetup={() => setScreen('mgba')}
                 />
               </TabsContent>
             </div>
           </Tabs>
+
+          <footer className="py-4 text-center text-xs text-muted-foreground/70">GEEF · {status?.app.version ?? '0.1.0'}</footer>
         </div>
       </main>
     </TooltipProvider>
   );
+
+  if (!hasLoadedStatus) {
+    return (
+      <TooltipProvider>
+        <main className="min-h-screen bg-background text-foreground">
+          <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-5">
+            <header className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md border bg-card">
+                  <Gamepad2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-normal">Divergence Launcher</h1>
+                  <p className="text-sm text-muted-foreground">Pokemon Emerald Rogue: Divergence desktop companion</p>
+                </div>
+              </div>
+            </header>
+
+            <Separator className="my-5" />
+
+            <div className="flex flex-1 items-center justify-center rounded-md border bg-card">
+              <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <span>Loading launcher state</span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </TooltipProvider>
+    );
+  }
+
+  return appShell;
 };

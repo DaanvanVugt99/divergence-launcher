@@ -10,16 +10,20 @@ Divergence Launcher is an optional Electron companion app for Pokemon Emerald Ro
 
 The renderer must not receive direct Node access.
 
-## v0.1 Boundaries
+## v0.2 Local Patching
 
-The v0.1 app shell contains placeholder flows only:
+The launcher performs ROM verification and patching entirely in the main process:
 
-- ROM selection.
-- Patch status.
-- mGBA setup.
-- Play.
+- `checksums.json` declares accepted source ROM hashes, the patch file name, and the expected patched ROM hash.
+- `selectRom` stores only the selected source ROM path. The base ROM is never copied into app data.
+- `verifySelectedRom` streams SHA-256 over the selected ROM and matches it against configured source profiles.
+- `patchSelectedRom` decodes the local xdelta patch to a temp file, verifies the patched SHA-256, then replaces the managed ROM.
+- `exportPatchedRom` copies the managed patched ROM to a user-selected destination.
+- `openPatchedRomFolder` opens the managed ROM directory for users who want to use another emulator.
 
-Real patch execution, checksum verification, settings persistence, and native mGBA launch are later milestones.
+The local xdelta runtime is provided by `@chainsafe/xdelta3-node`. Packaged builds copy the current platform native addon into `resources/xdelta/native` during `npm run package`, then load it from Electron resources if `node_modules` is not present.
+
+Native mGBA launch remains a later milestone.
 
 ## Future Mailbox Model
 

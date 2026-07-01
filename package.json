@@ -10,11 +10,13 @@
     "npm": ">=10"
   },
   "scripts": {
+    "prepackage": "node scripts/prepare-native-xdelta.mjs",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:patch": "node scripts/generate-patch.mjs"
   },
   "keywords": [
     "electron",
@@ -26,6 +28,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@chainsafe/xdelta3-node": "^1.0.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-progress": "^1.1.7",

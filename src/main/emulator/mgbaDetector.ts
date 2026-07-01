@@ -29,16 +29,71 @@ const getCandidatePaths = () => {
   return ['/usr/bin/mgba', '/usr/local/bin/mgba'];
 };
 
-export const detectMgba = async (configuredPath?: string | null): Promise<MgbaDetectionResult> => {
-  if (configuredPath && fs.existsSync(configuredPath)) {
+export const resolveMgbaExecutablePath = (candidatePath: string | null | undefined) => {
+  if (!candidatePath) {
+    return null;
+  }
+
+  if (process.platform === 'darwin' && candidatePath.endsWith('.app')) {
+    const bundleExecutablePath = path.join(candidatePath, 'Contents', 'MacOS', 'mGBA');
+
+    if (fs.existsSync(bundleExecutablePath) && fs.statSync(bundleExecutablePath).isFile()) {
+      return bundleExecutablePath;
+    }
+  }
+
+  if (!fs.existsSync(candidatePath)) {
+    return null;
+  }
+
+  const stat = fs.statSync(candidatePath);
+
+  if (!stat.isFile()) {
+    return null;
+  }
+
+  if (process.platform === 'win32') {
+    return candidatePath.toLowerCase().endsWith('.exe') ? candidatePath : null;
+  }
+
+  try {
+    fs.accessSync(candidatePath, fs.constants.X_OK);
+    return candidatePath;
+  } catch {
+    return null;
+  }
+};
+
+interface MgbaDetectionOptions {
+  allowCommonLocations?: boolean;
+}
+
+export const detectMgba = async (
+  configuredPath?: string | null,
+  options: MgbaDetectionOptions = {},
+): Promise<MgbaDetectionResult> => {
+  const allowCommonLocations = options.allowCommonLocations ?? true;
+  const resolvedConfiguredPath = resolveMgbaExecutablePath(configuredPath);
+
+  if (resolvedConfiguredPath) {
     return {
       status: 'found',
-      path: configuredPath,
+      path: resolvedConfiguredPath,
       source: 'configured',
     };
   }
 
-  const commonPath = getCandidatePaths().find((candidate) => fs.existsSync(candidate));
+  if (!allowCommonLocations) {
+    return {
+      status: 'not-found',
+      path: null,
+      source: 'unconfigured',
+    };
+  }
+
+  const commonPath = getCandidatePaths()
+    .map((candidate) => resolveMgbaExecutablePath(candidate))
+    .find(Boolean);
 
   if (commonPath) {
     return {
