@@ -14,8 +14,8 @@ npm run release:mac
 
 The generated app and ZIP are written under `out/`.
 
-`release:mac` runs the TypeScript check, unit tests, macOS ZIP build, and the
-artifact verifier.
+`release:mac` runs the TypeScript check, unit tests, macOS app packaging,
+deterministic ZIP creation with `ditto`, and the artifact verifier.
 
 ## CI Build
 
