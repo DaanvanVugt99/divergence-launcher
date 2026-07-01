@@ -25,25 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run checks
-        run: npm run release:check
-
-      - name: Package macOS app
-        run: npm run package:mac:ci
-
-      - name: Inspect packaged output
-        run: |
-          pwd
-          sw_vers
-          uname -m
-          find out -maxdepth 5 -print || true
-          find ../.divergence-launcher-electron-packager-tmp -maxdepth 5 -print || true
-
-      - name: Create macOS ZIP
-        run: npm run zip:mac
-
-      - name: Verify release artifact
-        run: npm run verify:mac-artifact
+      - name: Build and verify release artifact
+        run: npm run release:mac
 
       - name: Upload macOS ZIP
         uses: actions/upload-artifact@v4

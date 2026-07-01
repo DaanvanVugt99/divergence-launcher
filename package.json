@@ -18,7 +18,6 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "package:mac": "electron-forge package --platform=darwin --arch=arm64",
-    "package:mac:ci": "npm run package:mac || true; node scripts/package-macos-ci.cjs",
     "make": "electron-forge make",
     "make:mac": "electron-forge make --platform=darwin --arch=arm64",
     "zip:mac": "node scripts/create-macos-zip.mjs",

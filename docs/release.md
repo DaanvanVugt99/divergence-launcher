@@ -21,8 +21,7 @@ deterministic ZIP creation with `ditto`, and the artifact verifier.
 
 GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, and manual
 workflow dispatches. The workflow uses Node 22 LTS on the stable `macos-15`
-Apple Silicon runner, prints the packaged output tree before ZIP creation, and
-uploads the generated ZIP as an artifact.
+Apple Silicon runner and uploads the generated ZIP as an artifact.
 
 The CI artifact verifier checks:
 
@@ -69,15 +68,6 @@ When ready, the release workflow should add:
 
 Until then, CI artifacts are suitable for development testing, not polished
 public distribution.
-
-CI runs a direct Electron Packager fallback after Forge packaging. Forge is
-still used to build the Vite bundles, but if the hosted runner exits without a
-packaged `.app`, the fallback packages the already-built `.vite` output.
-Both Forge and the fallback use a stable temporary directory next to the repo,
-`../.divergence-launcher-electron-packager-tmp`, so hosted runner temp directory
-behavior cannot hide the final app move/copy step. The temp directory must stay
-outside the app source tree because Electron Packager copies the source into the
-temporary app bundle during packaging.
 
 ## Platform Notes
 

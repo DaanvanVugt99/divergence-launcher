@@ -14,7 +14,6 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const appIconPath = path.resolve(process.cwd(), 'resources/icons/icon');
 const appIconFilePath = `${appIconPath}.icns`;
 const productName = 'Divergence Launcher';
-const packagerTmpDir = path.resolve(process.cwd(), '..', '.divergence-launcher-electron-packager-tmp');
 
 function applyMacAppIcon(buildPath: string, platform: string): void {
   if (platform !== 'darwin') {
@@ -39,7 +38,6 @@ const config: ForgeConfig = {
     executableName: 'divergence-launcher',
     icon: appIconPath,
     extraResource: ['resources'],
-    tmpdir: packagerTmpDir,
     afterComplete: [
       (buildPath, _electronVersion, platform, _arch, callback) => {
         try {
