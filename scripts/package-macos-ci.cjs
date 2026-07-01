@@ -1,7 +1,6 @@
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { packager } = require('@electron/packager');
 
 const packageJson = require('../package.json');
 
@@ -55,7 +54,7 @@ function createStagingDirectory() {
   fs.writeFileSync(path.join(stagingDir, 'package.json'), `${JSON.stringify(packageJsonForApp, null, 2)}\n`);
 }
 
-async function main() {
+function main() {
   if (fs.existsSync(packagedAppPath)) {
     console.log(`Forge packaged app found: ${path.relative(repoRoot, packagedAppPath)}`);
     return;
@@ -65,39 +64,36 @@ async function main() {
   assertViteOutputExists();
   createStagingDirectory();
 
-  await packager({
-    dir: stagingDir,
-    name: appName,
-    platform: 'darwin',
-    arch,
-    out: outDir,
-    overwrite: true,
-    asar: true,
-    executableName: 'divergence-launcher',
-    appBundleId: 'dev.geef.divergence-launcher',
-    appCategoryType: 'public.app-category.games',
-    extraResource: [path.join(repoRoot, 'resources')],
-    quiet: false,
-    afterComplete: [
-      (buildPath, _electronVersion, _platform, _arch, callback) => {
-        try {
-          applyMacAppIcon(path.join(buildPath, `${appName}.app`));
-          callback();
-        } catch (error) {
-          callback(error instanceof Error ? error : new Error(String(error)));
-        }
-      },
+  execFileSync(
+    process.execPath,
+    [
+      path.join(repoRoot, 'node_modules', '@electron', 'packager', 'bin', 'electron-packager.js'),
+      stagingDir,
+      appName,
+      '--platform=darwin',
+      `--arch=${arch}`,
+      `--out=${outDir}`,
+      '--overwrite',
+      '--asar',
+      '--executable-name=divergence-launcher',
+      '--app-bundle-id=dev.geef.divergence-launcher',
+      '--app-category-type=public.app-category.games',
+      `--extra-resource=${path.join(repoRoot, 'resources')}`,
     ],
-  });
+    { stdio: 'inherit' },
+  );
 
   if (!fs.existsSync(packagedAppPath)) {
     throw new Error(`Direct packaging did not create ${path.relative(repoRoot, packagedAppPath)}`);
   }
 
+  applyMacAppIcon(packagedAppPath);
   console.log(`Direct packaged app created: ${path.relative(repoRoot, packagedAppPath)}`);
 }
 
-main().catch((error) => {
+try {
+  main();
+} catch (error) {
   console.error(error);
   process.exit(1);
-});
+}
