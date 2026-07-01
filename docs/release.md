@@ -1,7 +1,8 @@
 # Release Checklist
 
-v0.6 supports macOS arm64 release artifacts, optional Apple Developer ID signing
-and notarization, and tag-triggered GitHub Releases.
+v0.7 supports macOS arm64 and Windows x64 release artifacts, optional Apple
+Developer ID signing and notarization for macOS, and tag-triggered GitHub
+Releases.
 
 ## Local macOS Build
 
@@ -17,16 +18,32 @@ The generated app and ZIP are written under `out/`.
 `release:mac` runs the TypeScript check, unit tests, macOS app packaging,
 deterministic ZIP creation with `ditto`, and the artifact verifier.
 
+## Local Windows Build
+
+Run this on Windows with Node 22 or newer:
+
+```sh
+npm install
+npm run release:win
+```
+
+The generated app and ZIP are written under `out/`.
+
+`release:win` runs the TypeScript check, unit tests, Windows app packaging,
+ZIP creation with PowerShell `Compress-Archive`, and the Windows artifact
+verifier.
+
 ## CI Build
 
-GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, tags, and
-manual workflow dispatches. The workflow uses Node 22 LTS on the `macos-26`
-Apple Silicon runner and uploads the generated ZIP as an artifact.
+GitHub Actions builds macOS arm64 and Windows x64 ZIPs on pushes, pull
+requests, tags, and manual workflow dispatches. The workflow uses Node 22 LTS,
+the `macos-26` Apple Silicon runner for macOS, and a Windows runner for
+Windows.
 
-When a tag matching `v*` is pushed, CI also creates a GitHub Release and attaches
-the generated ZIP.
+When a tag matching `v*` is pushed, CI waits for both platform builds, then
+creates one GitHub Release and attaches both generated ZIPs.
 
-The CI artifact verifier checks:
+The macOS artifact verifier checks:
 
 - The ZIP exists.
 - The packaged app has bundle id `dev.geef.divergence-launcher`.
@@ -37,6 +54,16 @@ The CI artifact verifier checks:
 - The xdelta native addon license is included.
 - Signed builds pass `codesign --verify`.
 - Notarized builds pass `xcrun stapler validate`.
+
+The Windows artifact verifier checks:
+
+- The ZIP exists.
+- The packaged `.exe` exists.
+- The packaged app includes `app.asar`.
+- The Divergence xdelta patch is included.
+- The patch checksum metadata is included.
+- The win32-x64 xdelta native addon is included.
+- The xdelta native addon license is included.
 
 ## Manual Smoke Test
 
@@ -62,7 +89,7 @@ git push upstream v0.1.0
 ```
 
 The tag workflow creates the ZIP, verifies it, uploads it as an Actions artifact,
-and publishes a GitHub Release.
+and publishes a GitHub Release with macOS and Windows ZIPs.
 
 ## Unsigned macOS Builds
 
@@ -110,11 +137,12 @@ addon for the OS and CPU architecture doing the packaging. That means:
 - Apple Silicon macOS builds include the `darwin-arm64` addon.
 - Intel macOS builds need to be made on `darwin-x64` or by CI that installs that
   target dependency.
-- Windows builds need a Windows packaging job.
+- Windows x64 builds are made on a Windows CI job and include the
+  `win32-x64-msvc` addon.
 - Linux builds need a Linux packaging job once Linux support is promoted.
 
-Future release CI should use a platform matrix and run the same smoke checks on
-each generated artifact.
+Future release CI can become a formal platform matrix once Linux and Intel macOS
+are promoted.
 
 ## Distribution Rules
 

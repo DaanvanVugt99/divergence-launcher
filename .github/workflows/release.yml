@@ -1,4 +1,4 @@
-name: macOS Release Build
+name: Release Build
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: macos-release-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -90,16 +90,63 @@ jobs:
           path: out/make/zip/darwin/arm64/*.zip
           if-no-files-found: error
 
+  build-windows-x64:
+    name: Build Windows x64 artifact
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and verify release artifact
+        run: npm run release:win
+
+      - name: Upload Windows ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          name: divergence-launcher-win32-x64
+          path: out/make/zip/win32/x64/*.zip
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub release
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    needs:
+      - build-macos-arm64
+      - build-windows-x64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: release-artifacts
+
       - name: Publish GitHub release
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mapfile -t artifacts < <(find release-artifacts -type f -name '*.zip' | sort)
+
+          if [[ "${#artifacts[@]}" -eq 0 ]]; then
+            echo "No release ZIP artifacts found." >&2
+            exit 1
+          fi
+
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" out/make/zip/darwin/arm64/*.zip --clobber
+            gh release upload "$GITHUB_REF_NAME" "${artifacts[@]}" --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
-              out/make/zip/darwin/arm64/*.zip \
+              "${artifacts[@]}" \
               --title "$GITHUB_REF_NAME" \
               --generate-notes
           fi

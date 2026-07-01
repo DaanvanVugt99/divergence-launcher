@@ -11,3 +11,4 @@ Initial launcher development release.
 - Added macOS arm64 packaging and artifact verification.
 - Added GitHub Actions release artifact builds.
 - Added optional Apple Developer ID signing and notarization support.
+- Added Windows x64 release packaging and cross-platform release publishing.

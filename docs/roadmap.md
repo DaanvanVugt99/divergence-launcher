@@ -58,6 +58,14 @@
 - Enroll a personal Apple Developer account and configure signing/notarization
   secrets before public macOS distribution.
 
+## v0.7 Cross-Platform Release Support
+
+- Add Windows x64 release packaging.
+- Build macOS arm64 and Windows x64 artifacts in GitHub Actions.
+- Verify Windows artifacts include the app, patch, xdelta runtime, and license notice.
+- Publish both platform ZIPs from one tag-triggered GitHub Release job.
+- Keep Linux as a later target until its packaging and emulator expectations are tested.
+
 ## Future Online Bridge
 
 - Define a small mailbox protocol.
