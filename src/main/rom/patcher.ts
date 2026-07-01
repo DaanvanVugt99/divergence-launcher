@@ -103,7 +103,9 @@ export const getPatchPlan = (paths: LauncherPaths): PatchPlan => {
       expectedPatchedRom: metadata.patchedRom,
       outputFileName: metadata.patchedRom.outputFileName,
       status: fs.existsSync(patchFilePath) ? 'ready' : 'missing',
-      errorMessage: fs.existsSync(patchFilePath) ? null : 'Patch file is missing from the launcher resources.',
+      errorMessage: fs.existsSync(patchFilePath)
+        ? null
+        : 'Patch file is missing from the launcher resources.',
     };
   } catch (error) {
     return {

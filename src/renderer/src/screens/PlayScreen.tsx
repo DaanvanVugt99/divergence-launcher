@@ -1,8 +1,24 @@
-import { CheckCircle2, ChevronRight, CircleAlert, ExternalLink, FolderOpen, Loader2, Play, Save } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronRight,
+  CircleAlert,
+  ExternalLink,
+  FolderOpen,
+  Loader2,
+  Play,
+  Save,
+} from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { formatPathForWrap } from '@/lib/formatPath';
 
 interface PlayScreenProps {
@@ -99,7 +115,9 @@ export const PlayScreen = ({
       <CardContent className="space-y-5">
         <Alert>
           {readyForNativePlay ? <CheckCircle2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          <AlertTitle>{readyForNativePlay ? 'Ready for native play' : 'Native emulator flow'}</AlertTitle>
+          <AlertTitle>
+            {readyForNativePlay ? 'Ready for native play' : 'Native emulator flow'}
+          </AlertTitle>
           <AlertDescription>
             {readyForNativePlay
               ? 'Divergence is patched and mGBA is configured.'
@@ -117,7 +135,12 @@ export const PlayScreen = ({
                   <div className="mt-1 text-sm text-muted-foreground">{nextStep.description}</div>
                 </div>
               </div>
-              <Button type="button" variant="outline" onClick={nextStep.onSelect} className="shrink-0 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={nextStep.onSelect}
+                className="shrink-0 gap-2"
+              >
                 {nextStep.buttonLabel}
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -135,8 +158,14 @@ export const PlayScreen = ({
 
         {launchStatus ? (
           <Alert variant={launchStatus.type === 'error' ? 'destructive' : 'default'}>
-            {launchStatus.type === 'error' ? <CircleAlert className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-            <AlertTitle>{launchStatus.type === 'error' ? 'Launch failed' : 'mGBA launched'}</AlertTitle>
+            {launchStatus.type === 'error' ? (
+              <CircleAlert className="h-4 w-4" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
+            <AlertTitle>
+              {launchStatus.type === 'error' ? 'Launch failed' : 'mGBA launched'}
+            </AlertTitle>
             <AlertDescription className="break-all">{launchStatus.message}</AlertDescription>
           </Alert>
         ) : null}
@@ -147,7 +176,13 @@ export const PlayScreen = ({
             onClick={patchApplied ? undefined : onSelectPatchedRomSetup}
             disabled={patchApplied}
             className="rounded-md border bg-card p-4 text-left transition-colors enabled:hover:bg-accent disabled:cursor-default"
-            aria-label={patchApplied ? 'Patched ROM is ready' : hasSourceRom ? 'Open patch setup' : 'Open ROM setup'}
+            aria-label={
+              patchApplied
+                ? 'Patched ROM is ready'
+                : hasSourceRom
+                  ? 'Open patch setup'
+                  : 'Open ROM setup'
+            }
           >
             <div className="text-sm font-medium">Patched ROM</div>
             <div
@@ -187,7 +222,9 @@ export const PlayScreen = ({
           <div className="mt-4 grid gap-3">
             <div className="grid gap-1 md:grid-cols-[120px_minmax(0,1fr)]">
               <span className="text-muted-foreground">Patched ROM</span>
-              <span className="break-words">{formatPathForWrap(hasPatchedRom ? patchedRomPath : null, 'Not prepared')}</span>
+              <span className="break-words">
+                {formatPathForWrap(hasPatchedRom ? patchedRomPath : null, 'Not prepared')}
+              </span>
             </div>
             <div className="grid gap-1 md:grid-cols-[120px_minmax(0,1fr)]">
               <span className="text-muted-foreground">ROM hash</span>
@@ -202,16 +239,38 @@ export const PlayScreen = ({
       </CardContent>
       <CardFooter className="justify-end gap-3">
         <div className="flex flex-wrap justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onOpenPatchedRomFolder} disabled={!hasPatchedRom} className="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onOpenPatchedRomFolder}
+            disabled={!hasPatchedRom}
+            className="gap-2"
+          >
             <FolderOpen className="h-4 w-4" />
             Open Folder
           </Button>
-          <Button type="button" variant="outline" onClick={onExportPatchedRom} disabled={!patchApplied} className="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onExportPatchedRom}
+            disabled={!patchApplied}
+            className="gap-2"
+          >
             <Save className="h-4 w-4" />
             Export ROM
           </Button>
-          <Button type="button" variant="default" onClick={onLaunchMgba} disabled={!readyForNativePlay || isLaunchingMgba} className="gap-2">
-            {isLaunchingMgba ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+          <Button
+            type="button"
+            variant="default"
+            onClick={onLaunchMgba}
+            disabled={!readyForNativePlay || isLaunchingMgba}
+            className="gap-2"
+          >
+            {isLaunchingMgba ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ExternalLink className="h-4 w-4" />
+            )}
             {isLaunchingMgba ? 'Launching...' : 'Launch mGBA'}
           </Button>
         </div>

@@ -33,7 +33,9 @@ const platformPackages = {
 const target = platformPackages[`${process.platform}-${process.arch}`];
 
 if (!target) {
-  throw new Error(`No packaged xdelta native addon is configured for ${process.platform}-${process.arch}.`);
+  throw new Error(
+    `No packaged xdelta native addon is configured for ${process.platform}-${process.arch}.`,
+  );
 }
 
 const nativePackageEntry = require.resolve(target.packageName);

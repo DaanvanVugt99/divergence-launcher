@@ -1,6 +1,9 @@
 import { Fragment, type ReactNode } from 'react';
 
-export const formatPathForWrap = (value: string | null | undefined, fallback: string): ReactNode => {
+export const formatPathForWrap = (
+  value: string | null | undefined,
+  fallback: string,
+): ReactNode => {
   if (!value) {
     return fallback;
   }

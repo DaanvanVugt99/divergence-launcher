@@ -9,7 +9,15 @@ const repoRoot = path.resolve(__dirname, '..');
 const appName = 'Divergence Launcher';
 const arch = 'arm64';
 const appDir = path.join(repoRoot, 'out', `${appName}-darwin-${arch}`, `${appName}.app`);
-const zipPath = path.join(repoRoot, 'out', 'make', 'zip', 'darwin', arch, `${appName}-darwin-${arch}-${packageJson.version}.zip`);
+const zipPath = path.join(
+  repoRoot,
+  'out',
+  'make',
+  'zip',
+  'darwin',
+  arch,
+  `${appName}-darwin-${arch}-${packageJson.version}.zip`,
+);
 
 const requiredFiles = [
   zipPath,
@@ -18,8 +26,24 @@ const requiredFiles = [
   path.join(appDir, 'Contents', 'Resources', 'icon.icns'),
   path.join(appDir, 'Contents', 'Resources', 'resources', 'patches', 'checksums.json'),
   path.join(appDir, 'Contents', 'Resources', 'resources', 'patches', 'divergence-v0.1.xdelta'),
-  path.join(appDir, 'Contents', 'Resources', 'resources', 'xdelta', 'native', 'LICENSE.xdelta3-node'),
-  path.join(appDir, 'Contents', 'Resources', 'resources', 'xdelta', 'native', 'xdelta3-node.darwin-arm64.node'),
+  path.join(
+    appDir,
+    'Contents',
+    'Resources',
+    'resources',
+    'xdelta',
+    'native',
+    'LICENSE.xdelta3-node',
+  ),
+  path.join(
+    appDir,
+    'Contents',
+    'Resources',
+    'resources',
+    'xdelta',
+    'native',
+    'xdelta3-node.darwin-arm64.node',
+  ),
 ];
 
 function assertFileExists(filePath) {
@@ -71,9 +95,18 @@ if (iconFile !== 'icon.icns') {
 }
 
 assertZipContains(zipPath, `${appName}.app/Contents/Resources/icon.icns`);
-assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/patches/divergence-v0.1.xdelta`);
-assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/xdelta/native/xdelta3-node.darwin-arm64.node`);
-assertZipContains(zipPath, `${appName}.app/Contents/Resources/resources/xdelta/native/LICENSE.xdelta3-node`);
+assertZipContains(
+  zipPath,
+  `${appName}.app/Contents/Resources/resources/patches/divergence-v0.1.xdelta`,
+);
+assertZipContains(
+  zipPath,
+  `${appName}.app/Contents/Resources/resources/xdelta/native/xdelta3-node.darwin-arm64.node`,
+);
+assertZipContains(
+  zipPath,
+  `${appName}.app/Contents/Resources/resources/xdelta/native/LICENSE.xdelta3-node`,
+);
 
 if (process.env.APPLE_SIGNING_IDENTITY) {
   verifyCodeSignature(appDir);

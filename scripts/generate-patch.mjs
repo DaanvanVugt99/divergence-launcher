@@ -16,7 +16,8 @@ const patchDir = path.join(repoRoot, 'resources', 'patches');
 const patchPath = path.join(patchDir, patchFileName);
 const metadataPath = path.join(patchDir, 'checksums.json');
 
-const usage = 'Usage: npm run generate:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>';
+const usage =
+  'Usage: npm run generate:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>';
 
 const parseArgs = (argv) => {
   const result = {
@@ -118,7 +119,9 @@ const sourceSha256 = sha256(sourceBytes);
 const patchedSha256 = sha256(builtBytes);
 
 if (sourceSha256 !== expectedSourceSha256) {
-  throw new Error(`Source ROM hash mismatch. Expected ${expectedSourceSha256}, got ${sourceSha256}.`);
+  throw new Error(
+    `Source ROM hash mismatch. Expected ${expectedSourceSha256}, got ${sourceSha256}.`,
+  );
 }
 
 fs.mkdirSync(patchDir, { recursive: true });
@@ -128,7 +131,9 @@ const decodedBytes = decodeSync(sourceBytes, patchBytes);
 const decodedSha256 = sha256(decodedBytes);
 
 if (decodedSha256 !== patchedSha256) {
-  throw new Error(`Generated patch verification failed. Expected ${patchedSha256}, got ${decodedSha256}.`);
+  throw new Error(
+    `Generated patch verification failed. Expected ${patchedSha256}, got ${decodedSha256}.`,
+  );
 }
 
 fs.writeFileSync(patchPath, patchBytes);

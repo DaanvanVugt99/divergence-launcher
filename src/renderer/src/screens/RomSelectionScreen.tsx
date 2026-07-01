@@ -27,19 +27,28 @@ export const RomSelectionScreen = ({
   <Card>
     <CardHeader>
       <CardTitle>Source ROM</CardTitle>
-      <CardDescription>Select a legally obtained Pokemon Emerald ROM to prepare Divergence.</CardDescription>
+      <CardDescription>
+        Select a legally obtained Pokemon Emerald ROM to prepare Divergence.
+      </CardDescription>
     </CardHeader>
     <CardContent className="space-y-5">
       <Alert>
         <ShieldCheck className="h-4 w-4" />
         <AlertTitle>ROM required from user</AlertTitle>
-        <AlertDescription>The launcher will never ship a base Pokemon Emerald ROM.</AlertDescription>
+        <AlertDescription>
+          The launcher will never ship a base Pokemon Emerald ROM.
+        </AlertDescription>
       </Alert>
 
       <div className="space-y-2">
         <Label htmlFor="rom-path">Selected file</Label>
         <div className="flex gap-2">
-          <Input id="rom-path" readOnly value={selectedRomPath ?? ''} placeholder="No ROM selected" />
+          <Input
+            id="rom-path"
+            readOnly
+            value={selectedRomPath ?? ''}
+            placeholder="No ROM selected"
+          />
           <Button type="button" onClick={onChooseRom} className="shrink-0 gap-2">
             <FileUp className="h-4 w-4" />
             Choose
@@ -59,7 +68,13 @@ export const RomSelectionScreen = ({
             {sourceVerified ? 'Accepted' : verification ? 'Rejected' : 'Pending'}
           </Badge>
         </div>
-        <Button type="button" variant="outline" onClick={onVerifyRom} disabled={!selectedRomPath || isVerifying} className="mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onVerifyRom}
+          disabled={!selectedRomPath || isVerifying}
+          className="mt-4"
+        >
           {isVerifying ? 'Verifying...' : 'Verify ROM'}
         </Button>
       </div>

@@ -25,7 +25,9 @@ export const createMgbaLaunchRequest = ({
   expectedPatchedSha256,
 }: MgbaLaunchPreconditions): MgbaLaunchRequest => {
   if (mgba.status !== 'found' || !mgba.path) {
-    throw new Error('mGBA is not configured. Select an installed mGBA executable before launching.');
+    throw new Error(
+      'mGBA is not configured. Select an installed mGBA executable before launching.',
+    );
   }
 
   if (!romLibrary.hasPatchedRom) {
@@ -33,7 +35,9 @@ export const createMgbaLaunchRequest = ({
   }
 
   if (romLibrary.lastPatchedSha256 !== expectedPatchedSha256) {
-    throw new Error('The managed patched ROM is not verified. Reapply the patch before launching mGBA.');
+    throw new Error(
+      'The managed patched ROM is not verified. Reapply the patch before launching mGBA.',
+    );
   }
 
   return {

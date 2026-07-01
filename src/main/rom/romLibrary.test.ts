@@ -13,7 +13,8 @@ let paths: LauncherPaths;
 let settings: LauncherSettings;
 let metadata: PatchMetadata;
 
-const sha256 = (bytes: Uint8Array | string) => crypto.createHash('sha256').update(bytes).digest('hex');
+const sha256 = (bytes: Uint8Array | string) =>
+  crypto.createHash('sha256').update(bytes).digest('hex');
 
 beforeEach(() => {
   tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'divergence-rom-library-test-'));

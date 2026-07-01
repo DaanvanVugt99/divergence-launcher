@@ -19,11 +19,6 @@
       "@/*": ["./src/renderer/src/*"]
     }
   },
-  "include": [
-    "forge.config.ts",
-    "forge.env.d.ts",
-    "src",
-    "vite.*.config.ts"
-  ],
+  "include": ["forge.config.ts", "forge.env.d.ts", "src", "vite.*.config.ts"],
   "references": []
 }

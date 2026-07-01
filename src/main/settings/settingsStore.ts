@@ -44,14 +44,17 @@ const normalizeSettings = (value: unknown): LauncherSettings => {
   return {
     mgbaPath: typeof raw.mgbaPath === 'string' ? raw.mgbaPath : null,
     suppressMgbaAutoDetect: raw.suppressMgbaAutoDetect === true,
-    selectedSourceRomPath: typeof raw.selectedSourceRomPath === 'string' ? raw.selectedSourceRomPath : null,
+    selectedSourceRomPath:
+      typeof raw.selectedSourceRomPath === 'string' ? raw.selectedSourceRomPath : null,
     lastSourceRomVerification:
       raw.lastSourceRomVerification &&
       typeof raw.lastSourceRomVerification === 'object' &&
       typeof raw.lastSourceRomVerification.path === 'string' &&
       typeof raw.lastSourceRomVerification.sha256 === 'string' &&
-      (raw.lastSourceRomVerification.status === 'valid' || raw.lastSourceRomVerification.status === 'invalid') &&
-      (typeof raw.lastSourceRomVerification.matchedProfileId === 'string' || raw.lastSourceRomVerification.matchedProfileId === null) &&
+      (raw.lastSourceRomVerification.status === 'valid' ||
+        raw.lastSourceRomVerification.status === 'invalid') &&
+      (typeof raw.lastSourceRomVerification.matchedProfileId === 'string' ||
+        raw.lastSourceRomVerification.matchedProfileId === null) &&
       typeof raw.lastSourceRomVerification.verifiedAt === 'string'
         ? raw.lastSourceRomVerification
         : null,
@@ -89,7 +92,9 @@ export const writeSettings = (settings: LauncherSettings) => {
   fs.writeFileSync(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
 };
 
-export const updateSettings = (updater: (settings: LauncherSettings) => LauncherSettings): LauncherSettings => {
+export const updateSettings = (
+  updater: (settings: LauncherSettings) => LauncherSettings,
+): LauncherSettings => {
   const nextSettings = updater(getSettingsSnapshot());
 
   writeSettings(nextSettings);
