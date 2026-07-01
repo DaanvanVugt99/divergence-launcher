@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, clipboard, dialog, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron';
 import { getLauncherPaths } from './paths';
 import { applyPatch, getPatchMetadata, getPatchPlan, verifySourceRom } from './rom/patcher';
 import { getManagedPatchedRomPath, getRomLibraryState } from './rom/romLibrary';
@@ -19,45 +19,62 @@ const getSelectedSourceRomPath = (requestedPath: string) => {
   return selectedPath;
 };
 
-export const registerIpcHandlers = () => {
-  ipcMain.handle('launcher:getStatus', async () => {
-    const paths = getLauncherPaths();
-    const settings = getSettingsSnapshot();
-    const patchPlan = getPatchPlan(paths);
-    const romLibrary = await (async () => {
-      try {
-        return await getRomLibraryState(paths, getPatchMetadata(paths), settings);
-      } catch {
-        const patchedRomPath = path.join(paths.patchedRomDir, patchPlan.outputFileName);
-        const hasPatchedRom = fs.existsSync(patchedRomPath);
+const getLauncherStatus = async () => {
+  const paths = getLauncherPaths();
+  const settings = getSettingsSnapshot();
+  const patchPlan = getPatchPlan(paths);
+  const romLibrary = await (async () => {
+    try {
+      return await getRomLibraryState(paths, getPatchMetadata(paths), settings);
+    } catch {
+      const patchedRomPath = path.join(paths.patchedRomDir, patchPlan.outputFileName);
+      const hasPatchedRom = fs.existsSync(patchedRomPath);
 
-        return {
-          patchedRomPath,
-          hasPatchedRom,
-          sourceRomPath: settings.selectedSourceRomPath,
-          lastPatchedSha256: hasPatchedRom ? await sha256File(patchedRomPath) : null,
-          outputFileName: patchPlan.outputFileName,
-        };
-      }
-    })();
-    const mgba = await detectMgba(settings.mgbaPath, {
-      allowCommonLocations: !settings.suppressMgbaAutoDetect,
-    });
-
-    return {
-      app: {
-        version: app.getVersion(),
-        platform: process.platform,
-        arch: process.arch,
-        isPackaged: app.isPackaged,
-      },
-      paths,
-      settings,
-      romLibrary,
-      patchPlan,
-      mgba,
-    };
+      return {
+        patchedRomPath,
+        hasPatchedRom,
+        sourceRomPath: settings.selectedSourceRomPath,
+        lastPatchedSha256: hasPatchedRom ? await sha256File(patchedRomPath) : null,
+        outputFileName: patchPlan.outputFileName,
+      };
+    }
+  })();
+  const mgba = await detectMgba(settings.mgbaPath, {
+    allowCommonLocations: !settings.suppressMgbaAutoDetect,
   });
+
+  return {
+    app: {
+      version: app.getVersion(),
+      platform: process.platform,
+      arch: process.arch,
+      isPackaged: app.isPackaged,
+    },
+    paths,
+    settings,
+    romLibrary,
+    patchPlan,
+    mgba,
+  };
+};
+
+export const registerIpcHandlers = () => {
+  ipcMain.handle('launcher:getStatus', async () => getLauncherStatus());
+
+  ipcMain.handle(
+    'launcher:updateSettings',
+    async (_event, settingsUpdate: { minimizeLauncherOnGameLaunch?: boolean }) => {
+      updateSettings((settings) => ({
+        ...settings,
+        minimizeLauncherOnGameLaunch:
+          typeof settingsUpdate.minimizeLauncherOnGameLaunch === 'boolean'
+            ? settingsUpdate.minimizeLauncherOnGameLaunch
+            : settings.minimizeLauncherOnGameLaunch,
+      }));
+
+      return getLauncherStatus();
+    },
+  );
 
   ipcMain.handle('launcher:selectRom', async () => {
     const result = await dialog.showOpenDialog({
@@ -109,6 +126,7 @@ export const registerIpcHandlers = () => {
     writeSettings({
       mgbaPath: null,
       suppressMgbaAutoDetect: true,
+      minimizeLauncherOnGameLaunch: true,
       selectedSourceRomPath: null,
       lastSourceRomVerification: null,
       lastPatchedRom: null,
@@ -169,7 +187,7 @@ export const registerIpcHandlers = () => {
     await shell.openPath(path.dirname(romLibrary.patchedRomPath));
   });
 
-  ipcMain.handle('launcher:launchMgba', async () => {
+  ipcMain.handle('launcher:launchMgba', async (event) => {
     const paths = getLauncherPaths();
     const settings = getSettingsSnapshot();
     const metadata = getPatchMetadata(paths);
@@ -178,13 +196,19 @@ export const registerIpcHandlers = () => {
       allowCommonLocations: !settings.suppressMgbaAutoDetect,
     });
 
-    return launchMgba(
+    const result = await launchMgba(
       createMgbaLaunchRequest({
         mgba,
         romLibrary,
         expectedPatchedSha256: metadata.patchedRom.sha256,
       }),
     );
+
+    if (settings.minimizeLauncherOnGameLaunch) {
+      BrowserWindow.fromWebContents(event.sender)?.minimize();
+    }
+
+    return result;
   });
 
   ipcMain.handle('launcher:selectMgba', async () => {

@@ -4,6 +4,9 @@ out/
 dist/
 coverage/
 *.local
+
+# Local legal ROM inputs and scratch files. Never commit base ROMs or full ROM outputs.
+local/
 *.gba
 *.sav
 *.srm

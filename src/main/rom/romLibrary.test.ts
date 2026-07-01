@@ -29,6 +29,7 @@ beforeEach(() => {
   settings = {
     mgbaPath: null,
     suppressMgbaAutoDetect: false,
+    minimizeLauncherOnGameLaunch: true,
     selectedSourceRomPath: '/tmp/source.gba',
     lastSourceRomVerification: null,
     lastPatchedRom: {

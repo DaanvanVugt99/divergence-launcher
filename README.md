@@ -23,10 +23,22 @@ npm test
 npm run release:mac
 ```
 
-Generate the local patch artifact from a clean Emerald ROM and a local `pokeemerald-rogue` checkout:
+Update the local patch artifact from a clean Emerald ROM and a sibling
+`pokeemerald-rogue` checkout:
 
 ```sh
-npm run generate:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>
+npm run update:patch
+```
+
+The default source ROM path is
+`local/roms/source/Pokemon - Emerald Version (USA, Europe).gba`. The `local/`
+directory is ignored because it is only for legal local inputs and scratch files.
+Only commit the generated xdelta patch and checksum metadata.
+
+For non-default paths:
+
+```sh
+npm run update:patch -- --source-rom <clean-emerald.gba> --rogue-repo <pokeemerald-rogue>
 ```
 
 ## Development Workflow

@@ -5,12 +5,13 @@ import {
   Copy,
   Gamepad2,
   HardDrive,
-  Info,
   Loader2,
+  Minimize2,
   Moon,
   Play,
   RotateCcw,
   Settings2,
+  SlidersHorizontal,
   Sun,
 } from 'lucide-react';
 import type { LauncherStatus, SourceRomVerificationResult } from '../../preload/launcherApi';
@@ -25,6 +26,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -75,6 +77,8 @@ export const App = () => {
   const [isLaunchingMgba, setIsLaunchingMgba] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [diagnosticsStatus, setDiagnosticsStatus] = useState<string | null>(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference;
 
@@ -143,6 +147,8 @@ export const App = () => {
       .finally(() => setHasLoadedStatus(true));
   }, []);
 
+  useEffect(() => window.launcher.onOpenSettings(() => setSettingsOpen(true)), []);
+
   const effectiveMgbaPath = selectedMgbaPath ?? status?.mgba.path ?? null;
   const sourceRomPath = selectedRomPath ?? status?.romLibrary.sourceRomPath ?? null;
   const sourceVerified =
@@ -158,6 +164,7 @@ export const App = () => {
   );
   const mgbaReady = status?.mgba.status === 'found';
   const playReady = patchApplied && mgbaReady;
+  const minimizeLauncherOnGameLaunch = status?.settings.minimizeLauncherOnGameLaunch ?? true;
   const tabCompletion: Record<LauncherScreen, boolean> = {
     play: playReady,
     rom: sourceVerified,
@@ -300,6 +307,19 @@ export const App = () => {
     setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
+  const updateMinimizeOnLaunch = async (value: boolean) => {
+    setIsSavingSettings(true);
+
+    try {
+      const nextStatus = await window.launcher.updateSettings({
+        minimizeLauncherOnGameLaunch: value,
+      });
+      setStatus(nextStatus);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   const copyDiagnostics = async () => {
     const lines = [
       'Divergence Launcher diagnostics',
@@ -343,7 +363,7 @@ export const App = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Dialog>
+              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <DialogTrigger asChild>
@@ -354,17 +374,17 @@ export const App = () => {
                         className="h-8 w-8"
                         aria-label="Open settings"
                       >
-                        <Info className="h-4 w-4" />
+                        <SlidersHorizontal className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
                   </TooltipTrigger>
-                  <TooltipContent>About and settings</TooltipContent>
+                  <TooltipContent>Settings</TooltipContent>
                 </Tooltip>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Divergence Launcher</DialogTitle>
+                    <DialogTitle>Settings</DialogTitle>
                     <DialogDescription>
-                      Optional desktop launcher for Pokemon Emerald Rogue: Divergence.
+                      Launcher behavior, diagnostics, and local test controls.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -377,18 +397,40 @@ export const App = () => {
                     </div>
 
                     <div className="rounded-md border p-4">
+                      <div className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-card">
+                          <Minimize2 className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <h2 className="text-sm font-semibold">Minimize after launching mGBA</h2>
+                        </div>
+                        <Switch
+                          checked={minimizeLauncherOnGameLaunch}
+                          disabled={isSavingSettings}
+                          onCheckedChange={updateMinimizeOnLaunch}
+                          aria-label="Minimize launcher after launching mGBA"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-4">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <h2 className="text-sm font-semibold">Diagnostics</h2>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Copy app, platform, and setup status for tester reports. The selected
-                            source ROM path is not included.
-                          </p>
-                          {diagnosticsStatus ? (
-                            <p className="mt-2 text-xs text-muted-foreground">
-                              {diagnosticsStatus}
+                        <div className="flex min-w-0 gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-card">
+                            <Copy className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <h2 className="text-sm font-semibold">Diagnostics</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Copy app, platform, and setup status for tester reports. The selected
+                              source ROM path is not included.
                             </p>
-                          ) : null}
+                            {diagnosticsStatus ? (
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                {diagnosticsStatus}
+                              </p>
+                            ) : null}
+                          </div>
                         </div>
                         <Button
                           type="button"

@@ -68,6 +68,7 @@ beforeEach(() => {
   settings = {
     mgbaPath: null,
     suppressMgbaAutoDetect: false,
+    minimizeLauncherOnGameLaunch: true,
     selectedSourceRomPath: null,
     lastSourceRomVerification: null,
     lastPatchedRom: null,

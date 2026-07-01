@@ -3,6 +3,14 @@ import type { LauncherApi } from './launcherApi';
 
 const launcherApi: LauncherApi = {
   getStatus: () => ipcRenderer.invoke('launcher:getStatus'),
+  updateSettings: (settings) => ipcRenderer.invoke('launcher:updateSettings', settings),
+  onOpenSettings: (callback) => {
+    const listener = () => callback();
+
+    ipcRenderer.on('launcher:openSettings', listener);
+
+    return () => ipcRenderer.removeListener('launcher:openSettings', listener);
+  },
   selectRom: () => ipcRenderer.invoke('launcher:selectRom'),
   verifySelectedRom: (path: string) => ipcRenderer.invoke('launcher:verifySelectedRom', path),
   patchSelectedRom: (path: string) => ipcRenderer.invoke('launcher:patchSelectedRom', path),

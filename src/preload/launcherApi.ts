@@ -16,6 +16,7 @@ export interface LauncherStatus {
   settings: {
     mgbaPath: string | null;
     suppressMgbaAutoDetect: boolean;
+    minimizeLauncherOnGameLaunch: boolean;
     selectedSourceRomPath: string | null;
     lastSourceRomVerification: {
       path: string;
@@ -91,8 +92,14 @@ export interface FileSelectionResult {
   path: string;
 }
 
+export interface LauncherSettingsUpdate {
+  minimizeLauncherOnGameLaunch?: boolean;
+}
+
 export interface LauncherApi {
   getStatus: () => Promise<LauncherStatus>;
+  updateSettings: (settings: LauncherSettingsUpdate) => Promise<LauncherStatus>;
+  onOpenSettings: (callback: () => void) => () => void;
   selectRom: () => Promise<FileSelectionResult | null>;
   verifySelectedRom: (path: string) => Promise<SourceRomVerificationResult>;
   patchSelectedRom: (path: string) => Promise<PatchResult>;

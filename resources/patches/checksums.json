@@ -11,15 +11,15 @@
   "patchedRom": {
     "id": "divergence-v0.1",
     "label": "Pokemon Emerald Rogue: Divergence v0.1",
-    "sha256": "7ade3ef606dfbe8b1c7ef88028b386f13ca132462a5a72935bda83a303a12d1a",
+    "sha256": "4b2c72b114c3289c20714812b7f1808619f66e8a4f58a227e69268bf636e16d5",
     "outputFileName": "Pokemon Emerald Rogue Divergence.gba"
   },
   "generatedFrom": {
     "sourceRomLabel": "Pokemon Emerald (USA, Europe)",
     "rogueRepo": "pokeemerald-rogue",
-    "rogueCommit": "b98ce1f35047cbefc360333641eafba8b2892dab",
+    "rogueCommit": "afbeee53648ea73308b85b004c5f15f17aeeb3cb",
     "rogueDirty": false,
     "buildCommand": "make -j10 rom RELEASE=1",
-    "generatedAt": "2026-07-01T08:07:27.361Z"
+    "generatedAt": "2026-07-01T20:29:13.990Z"
   }
 }
