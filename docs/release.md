@@ -15,8 +15,9 @@ npm run release:mac
 
 The generated app and ZIP are written under `out/`.
 
-`release:mac` runs the TypeScript check, unit tests, macOS app packaging,
-deterministic ZIP creation with `ditto`, and the artifact verifier.
+`release:mac` runs the TypeScript check, unit tests, signing/notarization
+configuration check, macOS app packaging, deterministic ZIP creation with
+`ditto`, and the artifact verifier.
 
 ## Local Windows Build
 
@@ -132,20 +133,15 @@ git push upstream v0.1.0
 The tag workflow creates the ZIP, verifies it, uploads it as an Actions artifact,
 and publishes a GitHub Release with macOS and Windows ZIPs.
 
-## Unsigned macOS Builds
-
-If Apple signing secrets are absent, CI and local builds remain unsigned. macOS
-Gatekeeper may warn when opening an unsigned ZIP or app shared outside this
-machine.
-
 ## Signing And Notarization
 
 Signed and notarized builds require an Apple Developer Program membership, a
 Developer ID Application certificate, and App Store Connect API key credentials.
 
-TODO: Signing/notarization is wired but deferred until a personal Apple Developer
-account is available. Until then, release artifacts are unsigned development
-builds.
+Public macOS releases must be signed and notarized. `npm run release:mac` fails
+before packaging if the Developer ID signing identity or App Store Connect API
+key configuration is missing. Use `npm run package:mac` only for local unsigned
+development packages.
 
 Configure these GitHub Actions secrets:
 
@@ -169,6 +165,20 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
 The certificate secret enables signing. The API key secrets enable notarization
 and stapling. If any notarization value is set, all three API key secrets must be
 set together.
+
+For a local signed release build, import the Developer ID Application
+certificate into a keychain, then set:
+
+```sh
+export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+export APPLE_API_KEY_PATH="/absolute/path/to/AuthKey_XXXXXXXXXX.p8"
+export APPLE_API_KEY_ID="XXXXXXXXXX"
+export APPLE_API_ISSUER="00000000-0000-0000-0000-000000000000"
+npm run release:mac
+```
+
+If the certificate is in a non-default keychain, also set
+`APPLE_KEYCHAIN_PATH` to that keychain path.
 
 ## Platform Notes
 

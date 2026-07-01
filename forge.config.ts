@@ -43,6 +43,7 @@ function getMacSigningConfig() {
       keychain: macSigningKeychain,
       hardenedRuntime: true,
       entitlements: macEntitlementsPath,
+      continueOnError: false,
     },
     ...(notarizationValues.every(Boolean)
       ? {
@@ -84,7 +85,7 @@ const config: ForgeConfig = {
     icon: appIconPath,
     extraResource: ['resources'],
     ...getMacSigningConfig(),
-    afterComplete: [
+    afterCopyExtraResources: [
       (buildPath, _electronVersion, platform, _arch, callback) => {
         try {
           applyMacAppIcon(buildPath, platform);
