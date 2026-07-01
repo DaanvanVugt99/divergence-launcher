@@ -20,7 +20,9 @@ deterministic ZIP creation with `ditto`, and the artifact verifier.
 ## CI Build
 
 GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, and manual
-workflow dispatches. The workflow uploads the generated ZIP as an artifact.
+workflow dispatches. The workflow uses the stable `macos-15` Apple Silicon
+runner, prints the packaged output tree before ZIP creation, and uploads the
+generated ZIP as an artifact.
 
 The CI artifact verifier checks:
 
