@@ -14,7 +14,6 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const appIconPath = path.resolve(process.cwd(), 'resources/icons/icon');
 const appIconFilePath = `${appIconPath}.icns`;
 const productName = 'Divergence Launcher';
-const isCi = process.env.CI === 'true';
 
 function applyMacAppIcon(buildPath: string, platform: string): void {
   if (platform !== 'darwin') {
@@ -79,19 +78,15 @@ const config: ForgeConfig = {
         },
       ],
     }),
-    ...(!isCi
-      ? [
-          new FusesPlugin({
-            version: FuseVersion.V1,
-            [FuseV1Options.RunAsNode]: false,
-            [FuseV1Options.EnableCookieEncryption]: true,
-            [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-            [FuseV1Options.EnableNodeCliInspectArguments]: false,
-            [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-            [FuseV1Options.OnlyLoadAppFromAsar]: true,
-          }),
-        ]
-      : []),
+    new FusesPlugin({
+      version: FuseVersion.V1,
+      [FuseV1Options.RunAsNode]: false,
+      [FuseV1Options.EnableCookieEncryption]: true,
+      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    }),
   ],
 };
 

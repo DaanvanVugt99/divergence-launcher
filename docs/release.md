@@ -68,11 +68,6 @@ When ready, the release workflow should add:
 Until then, CI artifacts are suitable for development testing, not polished
 public distribution.
 
-The CI build currently skips Electron fuse flipping because Forge's fuses plugin
-performs macOS ad-hoc signing during packaging, which is unreliable on unsigned
-GitHub-hosted builds. Re-enable fuse hardening in CI when real signing and
-notarization are added.
-
 ## Platform Notes
 
 The xdelta runtime is a native Node addon. The local packaging script copies the
