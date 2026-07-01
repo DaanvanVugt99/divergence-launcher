@@ -133,6 +133,7 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           mapfile -t artifacts < <(find release-artifacts -type f -name '*.zip' | sort)
           release_flags=()
