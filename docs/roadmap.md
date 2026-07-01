@@ -36,6 +36,14 @@
 - Document release checks, unsigned macOS behavior, and future CI needs.
 - Add Windows and Linux release jobs later through a platform CI matrix.
 
+## v0.5 Release Hardening
+
+- Add GitHub Actions CI for macOS arm64 release artifacts.
+- Produce macOS ZIP artifacts from CI.
+- Verify packaged artifact contents, bundle id, icon, patch, xdelta runtime, and license notice.
+- Document macOS signing and notarization requirements.
+- Move debug reset into an About/settings dialog instead of keeping it in the top bar.
+
 ## Future Online Bridge
 
 - Define a small mailbox protocol.

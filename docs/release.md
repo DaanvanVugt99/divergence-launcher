@@ -9,11 +9,28 @@ Use Node 22 or newer, then run:
 
 ```sh
 npm install
-npm run release:check
-npm run make:mac
+npm run release:mac
 ```
 
 The generated app and ZIP are written under `out/`.
+
+`release:mac` runs the TypeScript check, unit tests, macOS ZIP build, and the
+artifact verifier.
+
+## CI Build
+
+GitHub Actions builds the macOS arm64 ZIP on pushes, pull requests, and manual
+workflow dispatches. The workflow uploads the generated ZIP as an artifact.
+
+The CI artifact verifier checks:
+
+- The ZIP exists.
+- The packaged app has bundle id `dev.geef.divergence-launcher`.
+- The packaged app uses `icon.icns`.
+- The Divergence xdelta patch is included.
+- The patch checksum metadata is included.
+- The darwin-arm64 xdelta native addon is included.
+- The xdelta native addon license is included.
 
 ## Manual Smoke Test
 
@@ -34,6 +51,22 @@ Before sharing a development build:
 Current builds are unsigned. macOS Gatekeeper may warn when opening a ZIP or app
 shared outside this machine. Public release builds should add Developer ID
 signing and notarization before distribution.
+
+## Signing And Notarization
+
+Signing and notarization are not enabled yet because they require an Apple
+Developer account and private credentials.
+
+When ready, the release workflow should add:
+
+- A Developer ID Application certificate stored as a GitHub Actions secret.
+- The certificate password stored as a GitHub Actions secret.
+- Apple notarization credentials stored as GitHub Actions secrets.
+- A signing step before ZIP creation.
+- A notarization and staple step before artifact upload.
+
+Until then, CI artifacts are suitable for development testing, not polished
+public distribution.
 
 ## Platform Notes
 

@@ -19,8 +19,7 @@ Useful checks:
 ```sh
 npm run typecheck
 npm test
-npm run package:mac
-npm run make:mac
+npm run release:mac
 ```
 
 Generate the local patch artifact from a clean Emerald ROM and a local `pokeemerald-rogue` checkout:

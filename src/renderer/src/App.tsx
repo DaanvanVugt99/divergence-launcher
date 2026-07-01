@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, CircleX, Gamepad2, HardDrive, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
+import { CheckCircle2, CircleX, Gamepad2, HardDrive, Info, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
 import type { LauncherStatus, SourceRomVerificationResult } from '../../preload/launcherApi';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -281,22 +283,52 @@ export const App = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={resetLauncherData}
-                    disabled={isResetting}
-                    className="h-8 w-8"
-                    aria-label="Reset launcher data"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Reset launcher data</TooltipContent>
-              </Tooltip>
+              <Dialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Open settings">
+                        <Info className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>About and settings</TooltipContent>
+                </Tooltip>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Divergence Launcher</DialogTitle>
+                    <DialogDescription>Optional desktop launcher for Pokemon Emerald Rogue: Divergence.</DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div className="grid gap-2 rounded-md border p-4 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">Version</span>
+                        <Badge variant="secondary">{status?.app.version ?? '0.1.0'}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">Build</span>
+                        <span className="font-medium">GEEF</span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h2 className="text-sm font-semibold">Debug reset</h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Clear launcher settings, selected paths, verification state, and the managed patched ROM.
+                          </p>
+                        </div>
+                        <Button type="button" variant="destructive" onClick={resetLauncherData} disabled={isResetting} className="shrink-0">
+                          {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                          Reset
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button type="button" variant="outline" size="icon" onClick={toggleTheme} className="h-8 w-8" aria-label="Toggle theme">

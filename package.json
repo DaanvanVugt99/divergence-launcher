@@ -20,7 +20,9 @@
     "package:mac": "electron-forge package --platform=darwin --arch=arm64",
     "make": "electron-forge make",
     "make:mac": "electron-forge make --platform=darwin --arch=arm64",
-    "release:check": "npm run typecheck && npm test && npm run package:mac",
+    "verify:mac-artifact": "node scripts/verify-macos-artifact.mjs",
+    "release:check": "npm run typecheck && npm test",
+    "release:mac": "npm run release:check && npm run make:mac && npm run verify:mac-artifact",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "generate:patch": "node scripts/generate-patch.mjs"
