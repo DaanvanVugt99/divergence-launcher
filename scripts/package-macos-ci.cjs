@@ -1,6 +1,7 @@
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const packager = require('@electron/packager');
 
 const packageJson = require('../package.json');
 
@@ -55,7 +56,59 @@ function createStagingDirectory() {
   fs.writeFileSync(path.join(stagingDir, 'package.json'), `${JSON.stringify(packageJsonForApp, null, 2)}\n`);
 }
 
-function main() {
+function listTree(directoryPath, maxDepth = 4, depth = 0) {
+  if (!fs.existsSync(directoryPath)) {
+    console.log(`${path.relative(repoRoot, directoryPath)}: missing`);
+    return;
+  }
+
+  if (depth > maxDepth) {
+    return;
+  }
+
+  const label = path.relative(repoRoot, directoryPath) || '.';
+  console.log(label);
+
+  if (!fs.statSync(directoryPath).isDirectory()) {
+    return;
+  }
+
+  for (const entry of fs.readdirSync(directoryPath).sort()) {
+    listTree(path.join(directoryPath, entry), maxDepth, depth + 1);
+  }
+}
+
+function getElectronVersion() {
+  const versionRange = packageJson.devDependencies?.electron ?? packageJson.dependencies?.electron;
+
+  if (!versionRange) {
+    throw new Error('Could not resolve Electron version from package.json.');
+  }
+
+  return versionRange.replace(/^[^\d]*/, '');
+}
+
+async function packageWithElectronPackager() {
+  const appPaths = await packager({
+    dir: stagingDir,
+    name: appName,
+    platform: 'darwin',
+    arch,
+    out: outDir,
+    overwrite: true,
+    asar: true,
+    executableName: 'divergence-launcher',
+    appBundleId: 'dev.geef.divergence-launcher',
+    appCategoryType: 'public.app-category.games',
+    extraResource: [path.join(repoRoot, 'resources')],
+    tmpdir: packagerTmpDir,
+    electronVersion: getElectronVersion(),
+  });
+
+  console.log(`Electron Packager returned app paths: ${appPaths.join(', ')}`);
+}
+
+async function main() {
   if (fs.existsSync(packagedAppPath)) {
     console.log(`Forge packaged app found: ${path.relative(repoRoot, packagedAppPath)}`);
     return;
@@ -67,27 +120,13 @@ function main() {
   fs.rmSync(packagerTmpDir, { recursive: true, force: true });
   fs.mkdirSync(packagerTmpDir, { recursive: true });
 
-  execFileSync(
-    process.execPath,
-    [
-      path.join(repoRoot, 'node_modules', '@electron', 'packager', 'bin', 'electron-packager.js'),
-      stagingDir,
-      appName,
-      '--platform=darwin',
-      `--arch=${arch}`,
-      `--out=${outDir}`,
-      '--overwrite',
-      '--asar',
-      '--executable-name=divergence-launcher',
-      '--app-bundle-id=dev.geef.divergence-launcher',
-      '--app-category-type=public.app-category.games',
-      `--extra-resource=${path.join(repoRoot, 'resources')}`,
-      `--tmpdir=${packagerTmpDir}`,
-    ],
-    { stdio: 'inherit' },
-  );
+  await packageWithElectronPackager();
 
   if (!fs.existsSync(packagedAppPath)) {
+    console.log('Packaged app was not found after Electron Packager finished. Output tree:');
+    listTree(outDir);
+    console.log('Packager temp tree:');
+    listTree(packagerTmpDir);
     throw new Error(`Direct packaging did not create ${path.relative(repoRoot, packagedAppPath)}`);
   }
 
@@ -95,9 +134,7 @@ function main() {
   console.log(`Direct packaged app created: ${path.relative(repoRoot, packagedAppPath)}`);
 }
 
-try {
-  main();
-} catch (error) {
+main().catch((error) => {
   console.error(error);
   process.exit(1);
-}
+});
