@@ -1,9 +1,29 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, CircleX, Copy, Gamepad2, HardDrive, Info, Loader2, Moon, Play, RotateCcw, Settings2, Sun } from 'lucide-react';
+import {
+  CheckCircle2,
+  CircleX,
+  Copy,
+  Gamepad2,
+  HardDrive,
+  Info,
+  Loader2,
+  Moon,
+  Play,
+  RotateCcw,
+  Settings2,
+  Sun,
+} from 'lucide-react';
 import type { LauncherStatus, SourceRomVerificationResult } from '../../preload/launcherApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -48,7 +68,10 @@ export const App = () => {
   const [patchError, setPatchError] = useState<string | null>(null);
   const [patchSuccess, setPatchSuccess] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
-  const [launchStatus, setLaunchStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [launchStatus, setLaunchStatus] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [isLaunchingMgba, setIsLaunchingMgba] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [diagnosticsStatus, setDiagnosticsStatus] = useState<string | null>(null);
@@ -82,8 +105,14 @@ export const App = () => {
     const storedVerification = nextStatus.settings.lastSourceRomVerification;
 
     setStatus(nextStatus);
-    setSelectedRomPath((current) => (options?.replaceLocalState ? nextStatus.romLibrary.sourceRomPath : current ?? nextStatus.romLibrary.sourceRomPath));
-    setSelectedMgbaPath((current) => (options?.replaceLocalState ? nextStatus.mgba.path : current ?? nextStatus.mgba.path));
+    setSelectedRomPath((current) =>
+      options?.replaceLocalState
+        ? nextStatus.romLibrary.sourceRomPath
+        : (current ?? nextStatus.romLibrary.sourceRomPath),
+    );
+    setSelectedMgbaPath((current) =>
+      options?.replaceLocalState ? nextStatus.mgba.path : (current ?? nextStatus.mgba.path),
+    );
     setRomVerification((current) => {
       if (current) {
         return current;
@@ -94,7 +123,9 @@ export const App = () => {
       }
 
       const matchedProfile =
-        nextStatus.patchPlan.expectedBaseRoms.find((profile) => profile.id === storedVerification.matchedProfileId) ?? null;
+        nextStatus.patchPlan.expectedBaseRoms.find(
+          (profile) => profile.id === storedVerification.matchedProfileId,
+        ) ?? null;
 
       return {
         path: storedVerification.path,
@@ -118,12 +149,12 @@ export const App = () => {
     romVerification?.status === 'valid' ||
     Boolean(
       status?.settings.lastSourceRomVerification?.status === 'valid' &&
-        status.settings.lastSourceRomVerification.path === sourceRomPath,
+      status.settings.lastSourceRomVerification.path === sourceRomPath,
     );
   const patchApplied = Boolean(
     status?.romLibrary.hasPatchedRom &&
-      status.romLibrary.lastPatchedSha256 &&
-      status.romLibrary.lastPatchedSha256 === status.patchPlan.expectedPatchedRom.sha256,
+    status.romLibrary.lastPatchedSha256 &&
+    status.romLibrary.lastPatchedSha256 === status.patchPlan.expectedPatchedRom.sha256,
   );
   const mgbaReady = status?.mgba.status === 'found';
   const playReady = patchApplied && mgbaReady;
@@ -209,7 +240,9 @@ export const App = () => {
     try {
       await window.launcher.openPatchedRomFolder();
     } catch (error) {
-      setExportStatus(error instanceof Error ? error.message : 'Could not open patched ROM folder.');
+      setExportStatus(
+        error instanceof Error ? error.message : 'Could not open patched ROM folder.',
+      );
     }
   };
 
@@ -280,11 +313,7 @@ export const App = () => {
       `Patched ROM ready: ${patchApplied ? 'yes' : 'no'}`,
       `mGBA status: ${status?.mgba.status ?? 'unknown'}`,
       `mGBA source: ${status?.mgba.source ?? 'unknown'}`,
-      `Last error: ${
-        launchStatus?.type === 'error'
-          ? launchStatus.message
-          : patchError ?? 'none'
-      }`,
+      `Last error: ${launchStatus?.type === 'error' ? launchStatus.message : (patchError ?? 'none')}`,
     ];
 
     try {
@@ -307,7 +336,9 @@ export const App = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold tracking-normal">Divergence Launcher</h1>
-                  <p className="text-sm text-muted-foreground">Pokemon Emerald Rogue: Divergence desktop companion</p>
+                  <p className="text-sm text-muted-foreground">
+                    Pokemon Emerald Rogue: Divergence desktop companion
+                  </p>
                 </div>
               </div>
             </div>
@@ -316,7 +347,13 @@ export const App = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                      <Button type="button" variant="outline" size="icon" className="h-8 w-8" aria-label="Open settings">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        aria-label="Open settings"
+                      >
                         <Info className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
@@ -326,7 +363,9 @@ export const App = () => {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Divergence Launcher</DialogTitle>
-                    <DialogDescription>Optional desktop launcher for Pokemon Emerald Rogue: Divergence.</DialogDescription>
+                    <DialogDescription>
+                      Optional desktop launcher for Pokemon Emerald Rogue: Divergence.
+                    </DialogDescription>
                   </DialogHeader>
 
                   <div className="space-y-4">
@@ -342,11 +381,21 @@ export const App = () => {
                         <div>
                           <h2 className="text-sm font-semibold">Diagnostics</h2>
                           <p className="mt-1 text-sm text-muted-foreground">
-                            Copy app, platform, and setup status for tester reports. The selected source ROM path is not included.
+                            Copy app, platform, and setup status for tester reports. The selected
+                            source ROM path is not included.
                           </p>
-                          {diagnosticsStatus ? <p className="mt-2 text-xs text-muted-foreground">{diagnosticsStatus}</p> : null}
+                          {diagnosticsStatus ? (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {diagnosticsStatus}
+                            </p>
+                          ) : null}
                         </div>
-                        <Button type="button" variant="outline" onClick={copyDiagnostics} className="shrink-0 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={copyDiagnostics}
+                          className="shrink-0 gap-2"
+                        >
                           <Copy className="h-4 w-4" />
                           Copy
                         </Button>
@@ -358,11 +407,22 @@ export const App = () => {
                         <div>
                           <h2 className="text-sm font-semibold">Debug reset</h2>
                           <p className="mt-1 text-sm text-muted-foreground">
-                            Clear launcher settings, selected paths, verification state, and the managed patched ROM.
+                            Clear launcher settings, selected paths, verification state, and the
+                            managed patched ROM.
                           </p>
                         </div>
-                        <Button type="button" variant="destructive" onClick={resetLauncherData} disabled={isResetting} className="shrink-0">
-                          {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={resetLauncherData}
+                          disabled={isResetting}
+                          className="shrink-0"
+                        >
+                          {isResetting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RotateCcw className="h-4 w-4" />
+                          )}
                           Reset
                         </Button>
                       </div>
@@ -372,18 +432,35 @@ export const App = () => {
               </Dialog>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button type="button" variant="outline" size="icon" onClick={toggleTheme} className="h-8 w-8" aria-label="Toggle theme">
-                    {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={toggleTheme}
+                    className="h-8 w-8"
+                    aria-label="Toggle theme"
+                  >
+                    {resolvedTheme === 'dark' ? (
+                      <Sun className="h-4 w-4" />
+                    ) : (
+                      <Moon className="h-4 w-4" />
+                    )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{resolvedTheme === 'dark' ? 'Use light mode' : 'Use dark mode'}</TooltipContent>
+                <TooltipContent>
+                  {resolvedTheme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+                </TooltipContent>
               </Tooltip>
             </div>
           </header>
 
           <Separator className="my-5" />
 
-          <Tabs value={screen} onValueChange={(value) => setScreen(value as LauncherScreen)} className="flex flex-1 flex-col">
+          <Tabs
+            value={screen}
+            onValueChange={(value) => setScreen(value as LauncherScreen)}
+            className="flex flex-1 flex-col"
+          >
             <TabsList className="grid w-full grid-cols-4">
               {screens.map((item) => (
                 <TabsTrigger key={item.value} value={item.value} className="gap-2">
@@ -427,7 +504,9 @@ export const App = () => {
                   detectedMgbaPath={status?.mgba.path ?? null}
                   selectedMgbaPath={selectedMgbaPath}
                   onChooseMgba={chooseMgba}
-                  onOpenDownload={() => window.launcher.openExternal('https://mgba.io/downloads.html')}
+                  onOpenDownload={() =>
+                    window.launcher.openExternal('https://mgba.io/downloads.html')
+                  }
                 />
               </TabsContent>
               <TabsContent value="play" className="mt-0">
@@ -453,7 +532,9 @@ export const App = () => {
             </div>
           </Tabs>
 
-          <footer className="py-4 text-center text-xs text-muted-foreground/70">GEEF · {status?.app.version ?? '0.1.0'}</footer>
+          <footer className="py-4 text-center text-xs text-muted-foreground/70">
+            GEEF · {status?.app.version ?? '0.1.0'}
+          </footer>
         </div>
       </main>
     </TooltipProvider>
@@ -471,7 +552,9 @@ export const App = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold tracking-normal">Divergence Launcher</h1>
-                  <p className="text-sm text-muted-foreground">Pokemon Emerald Rogue: Divergence desktop companion</p>
+                  <p className="text-sm text-muted-foreground">
+                    Pokemon Emerald Rogue: Divergence desktop companion
+                  </p>
                 </div>
               </div>
             </header>

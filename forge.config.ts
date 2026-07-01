@@ -28,10 +28,13 @@ function getMacSigningConfig() {
   }
 
   const notarizationValues = [appleApiKey, appleApiKeyId, appleApiIssuer];
-  const hasPartialNotarization = notarizationValues.some(Boolean) && !notarizationValues.every(Boolean);
+  const hasPartialNotarization =
+    notarizationValues.some(Boolean) && !notarizationValues.every(Boolean);
 
   if (hasPartialNotarization) {
-    throw new Error('Apple notarization is partially configured. Set APPLE_API_KEY_PATH, APPLE_API_KEY_ID, and APPLE_API_ISSUER together.');
+    throw new Error(
+      'Apple notarization is partially configured. Set APPLE_API_KEY_PATH, APPLE_API_KEY_ID, and APPLE_API_ISSUER together.',
+    );
   }
 
   return {
@@ -65,7 +68,11 @@ function applyMacAppIcon(buildPath: string, platform: string): void {
   const packagedIconPath = path.join(resourcesPath, packagedIconName);
 
   fs.copyFileSync(appIconFilePath, packagedIconPath);
-  execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :CFBundleIconFile ${packagedIconName}`, plistPath]);
+  execFileSync('/usr/libexec/PlistBuddy', [
+    '-c',
+    `Set :CFBundleIconFile ${packagedIconName}`,
+    plistPath,
+  ]);
 }
 
 const config: ForgeConfig = {
@@ -89,12 +96,7 @@ const config: ForgeConfig = {
     ],
   },
   rebuildConfig: {},
-  makers: [
-    new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
-  ],
+  makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
   plugins: [
     new AutoUnpackNativesPlugin({}),
     new VitePlugin({

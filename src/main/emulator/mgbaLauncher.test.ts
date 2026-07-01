@@ -36,10 +36,14 @@ describe('launchMgba', () => {
       mgbaPath: '/Applications/mGBA.app/Contents/MacOS/mGBA',
       romPath: '/Users/test/Divergence.gba',
     });
-    expect(spawnMock).toHaveBeenCalledWith('/Applications/mGBA.app/Contents/MacOS/mGBA', ['/Users/test/Divergence.gba'], {
-      detached: true,
-      stdio: 'ignore',
-    });
+    expect(spawnMock).toHaveBeenCalledWith(
+      '/Applications/mGBA.app/Contents/MacOS/mGBA',
+      ['/Users/test/Divergence.gba'],
+      {
+        detached: true,
+        stdio: 'ignore',
+      },
+    );
     expect(childProcess.unref).toHaveBeenCalledOnce();
   });
 

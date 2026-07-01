@@ -11,7 +11,15 @@ const executableName = 'divergence-launcher.exe';
 const platform = 'win32';
 const arch = 'x64';
 const appDir = path.join(repoRoot, 'out', `${appName}-${platform}-${arch}`);
-const zipPath = path.join(repoRoot, 'out', 'make', 'zip', platform, arch, `${appName}-${platform}-${arch}-${packageJson.version}.zip`);
+const zipPath = path.join(
+  repoRoot,
+  'out',
+  'make',
+  'zip',
+  platform,
+  arch,
+  `${appName}-${platform}-${arch}-${packageJson.version}.zip`,
+);
 
 const requiredFiles = [
   zipPath,
@@ -20,7 +28,14 @@ const requiredFiles = [
   path.join(appDir, 'resources', 'resources', 'patches', 'checksums.json'),
   path.join(appDir, 'resources', 'resources', 'patches', 'divergence-v0.1.xdelta'),
   path.join(appDir, 'resources', 'resources', 'xdelta', 'native', 'LICENSE.xdelta3-node'),
-  path.join(appDir, 'resources', 'resources', 'xdelta', 'native', 'xdelta3-node.win32-x64-msvc.node'),
+  path.join(
+    appDir,
+    'resources',
+    'resources',
+    'xdelta',
+    'native',
+    'xdelta3-node.win32-x64-msvc.node',
+  ),
 ];
 
 function quotePowerShell(value) {
@@ -69,7 +84,10 @@ const zipRoot = `${appName}-${platform}-${arch}`;
 assertZipContains(entries, `${zipRoot}/${executableName}`);
 assertZipContains(entries, `${zipRoot}/resources/app.asar`);
 assertZipContains(entries, `${zipRoot}/resources/resources/patches/divergence-v0.1.xdelta`);
-assertZipContains(entries, `${zipRoot}/resources/resources/xdelta/native/xdelta3-node.win32-x64-msvc.node`);
+assertZipContains(
+  entries,
+  `${zipRoot}/resources/resources/xdelta/native/xdelta3-node.win32-x64-msvc.node`,
+);
 assertZipContains(entries, `${zipRoot}/resources/resources/xdelta/native/LICENSE.xdelta3-node`);
 
 console.log('Windows artifact verification passed.');

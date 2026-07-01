@@ -69,8 +69,11 @@ export const registerIpcHandlers = () => {
       ...settings,
       selectedSourceRomPath: selectedPath,
       lastSourceRomVerification:
-        settings.lastSourceRomVerification?.path === selectedPath ? settings.lastSourceRomVerification : null,
-      lastPatchedRom: settings.selectedSourceRomPath === selectedPath ? settings.lastPatchedRom : null,
+        settings.lastSourceRomVerification?.path === selectedPath
+          ? settings.lastSourceRomVerification
+          : null,
+      lastPatchedRom:
+        settings.selectedSourceRomPath === selectedPath ? settings.lastPatchedRom : null,
     }));
 
     return { path: selectedPath };
@@ -121,7 +124,9 @@ export const registerIpcHandlers = () => {
     const romLibrary = await getRomLibraryState(paths, metadata, settings);
 
     if (!romLibrary.hasPatchedRom || romLibrary.lastPatchedSha256 !== metadata.patchedRom.sha256) {
-      throw new Error('No verified patched ROM is ready to export. Reapply the patch before exporting.');
+      throw new Error(
+        'No verified patched ROM is ready to export. Reapply the patch before exporting.',
+      );
     }
 
     const result = await dialog.showSaveDialog({

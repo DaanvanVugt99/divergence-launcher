@@ -6,9 +6,7 @@ type LegacyForgeOutputOptions = {
 
 const preloadOutputConfig = {
   codeSplitting: false,
-} satisfies NonNullable<
-  NonNullable<NonNullable<UserConfig['build']>['rolldownOptions']>['output']
->;
+} satisfies NonNullable<NonNullable<NonNullable<UserConfig['build']>['rolldownOptions']>['output']>;
 
 const removeDeprecatedInlineDynamicImports = (): Plugin => ({
   name: 'remove-deprecated-inline-dynamic-imports',

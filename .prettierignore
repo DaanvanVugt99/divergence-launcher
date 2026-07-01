@@ -1,0 +1,8 @@
+out
+node_modules
+.vite
+dist
+coverage
+package-lock.json
+resources/patches/*.xdelta
+resources/xdelta/native/*

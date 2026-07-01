@@ -19,7 +19,8 @@ let tempDir: string;
 let paths: LauncherPaths;
 let settings: LauncherSettings;
 
-const sha256 = (bytes: Uint8Array | string) => crypto.createHash('sha256').update(bytes).digest('hex');
+const sha256 = (bytes: Uint8Array | string) =>
+  crypto.createHash('sha256').update(bytes).digest('hex');
 
 const writePatchFixture = (expectedPatchedHash?: string) => {
   const sourcePath = path.join(tempDir, 'source.gba');
