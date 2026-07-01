@@ -75,10 +75,6 @@ performs macOS ad-hoc signing during packaging, which is unreliable on unsigned
 GitHub-hosted builds. Re-enable fuse hardening in CI when real signing and
 notarization are added.
 
-CI also runs a direct Electron Packager fallback after Forge packaging. Forge is
-still used to build the Vite bundles, but if the hosted runner exits without a
-packaged `.app`, the fallback packages the already-built `.vite` output.
-
 ## Platform Notes
 
 The xdelta runtime is a native Node addon. The local packaging script copies the
