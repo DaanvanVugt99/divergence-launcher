@@ -28,3 +28,9 @@ v0.2 uses `@chainsafe/xdelta3-node` for local xdelta support. The package is Apa
 Packaged builds copy the platform native addon outside the application ASAR under `resources/xdelta/native`. Keep the package license notice with published builds.
 
 The launcher must still fail clearly if a target platform build does not include a usable xdelta native addon.
+
+## Release Artifacts
+
+The current local release path produces unsigned macOS development artifacts. Public distribution should add macOS signing/notarization and platform-specific CI before promising Windows or Linux downloads.
+
+Launcher releases may include the Divergence xdelta patch, but must not include a base Pokemon Emerald ROM or a full pre-patched ROM.

@@ -1,4 +1,7 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
@@ -8,11 +11,43 @@ import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
+const appIconPath = path.resolve(process.cwd(), 'resources/icons/icon');
+const appIconFilePath = `${appIconPath}.icns`;
+const productName = 'Divergence Launcher';
+
+function applyMacAppIcon(buildPath: string, platform: string): void {
+  if (platform !== 'darwin') {
+    return;
+  }
+
+  const appPath = path.join(buildPath, `${productName}.app`);
+  const resourcesPath = path.join(appPath, 'Contents', 'Resources');
+  const plistPath = path.join(appPath, 'Contents', 'Info.plist');
+  const packagedIconName = 'icon.icns';
+  const packagedIconPath = path.join(resourcesPath, packagedIconName);
+
+  fs.copyFileSync(appIconFilePath, packagedIconPath);
+  execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :CFBundleIconFile ${packagedIconName}`, plistPath]);
+}
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    appBundleId: 'dev.geef.divergence-launcher',
+    appCategoryType: 'public.app-category.games',
     executableName: 'divergence-launcher',
+    icon: appIconPath,
     extraResource: ['resources'],
+    afterComplete: [
+      (buildPath, _electronVersion, platform, _arch, callback) => {
+        try {
+          applyMacAppIcon(buildPath, platform);
+          callback();
+        } catch (error) {
+          callback(error instanceof Error ? error : new Error(String(error)));
+        }
+      },
+    ],
   },
   rebuildConfig: {},
   makers: [

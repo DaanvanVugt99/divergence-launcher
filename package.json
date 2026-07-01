@@ -10,10 +10,17 @@
     "npm": ">=10"
   },
   "scripts": {
-    "prepackage": "node scripts/prepare-native-xdelta.mjs",
+    "prepare:package-resources": "node scripts/prepare-native-xdelta.mjs",
+    "prepackage": "npm run prepare:package-resources",
+    "prepackage:mac": "npm run prepare:package-resources",
+    "premake": "npm run prepare:package-resources",
+    "premake:mac": "npm run prepare:package-resources",
     "start": "electron-forge start",
     "package": "electron-forge package",
+    "package:mac": "electron-forge package --platform=darwin --arch=arm64",
     "make": "electron-forge make",
+    "make:mac": "electron-forge make --platform=darwin --arch=arm64",
+    "release:check": "npm run typecheck && npm test && npm run package:mac",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "generate:patch": "node scripts/generate-patch.mjs"
@@ -25,7 +32,7 @@
     "mgba",
     "xdelta"
   ],
-  "author": "",
+  "author": "GEEF",
   "license": "MIT",
   "dependencies": {
     "@chainsafe/xdelta3-node": "^1.0.2",

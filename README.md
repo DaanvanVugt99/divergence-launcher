@@ -5,6 +5,7 @@ Optional desktop launcher for Pokemon Emerald Rogue: Divergence.
 The launcher is a companion app. It does not include a Pokemon Emerald ROM, does not emulate the game in a browser, and does not make online services mandatory for normal gameplay.
 
 See [docs/roadmap.md](docs/roadmap.md) for planned milestones.
+See [docs/release.md](docs/release.md) for local packaging notes.
 
 ## Development
 
@@ -18,7 +19,8 @@ Useful checks:
 ```sh
 npm run typecheck
 npm test
-npm run package
+npm run package:mac
+npm run make:mac
 ```
 
 Generate the local patch artifact from a clean Emerald ROM and a local `pokeemerald-rogue` checkout:

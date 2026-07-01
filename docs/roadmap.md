@@ -30,10 +30,11 @@
 
 ## v0.4 Packaging
 
-- Package macOS, Windows, and Linux builds.
-- Include xdelta native runtime support outside ASAR where needed.
+- Package unsigned macOS development builds first.
+- Include the matching xdelta native runtime support outside ASAR.
 - Add license notices for bundled tools.
-- Document install and troubleshooting.
+- Document release checks, unsigned macOS behavior, and future CI needs.
+- Add Windows and Linux release jobs later through a platform CI matrix.
 
 ## Future Online Bridge
 
