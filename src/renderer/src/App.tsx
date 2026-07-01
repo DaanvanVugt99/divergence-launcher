@@ -46,6 +46,8 @@ export const App = () => {
   const [patchError, setPatchError] = useState<string | null>(null);
   const [patchSuccess, setPatchSuccess] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const [launchStatus, setLaunchStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isLaunchingMgba, setIsLaunchingMgba] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference;
@@ -134,6 +136,7 @@ export const App = () => {
       setSelectedRomPath(result.path);
       setRomVerification(null);
       setPatchError(null);
+      setLaunchStatus(null);
     }
   };
 
@@ -165,6 +168,7 @@ export const App = () => {
     setIsPatching(true);
     setPatchError(null);
     setPatchSuccess(null);
+    setLaunchStatus(null);
 
     try {
       const result = await window.launcher.patchSelectedRom(sourceRomPath);
@@ -181,12 +185,14 @@ export const App = () => {
     const result = await window.launcher.selectMgba();
     if (result) {
       setSelectedMgbaPath(result.path);
+      setLaunchStatus(null);
       await refreshStatus();
     }
   };
 
   const exportPatchedRom = async () => {
     setExportStatus(null);
+    setLaunchStatus(null);
 
     try {
       const result = await window.launcher.exportPatchedRom();
@@ -201,6 +207,28 @@ export const App = () => {
       await window.launcher.openPatchedRomFolder();
     } catch (error) {
       setExportStatus(error instanceof Error ? error.message : 'Could not open patched ROM folder.');
+    }
+  };
+
+  const launchMgba = async () => {
+    setIsLaunchingMgba(true);
+    setLaunchStatus(null);
+    setExportStatus(null);
+
+    try {
+      const result = await window.launcher.launchMgba();
+      setLaunchStatus({
+        type: 'success',
+        message: `Started mGBA with ${result.romPath}`,
+      });
+      await refreshStatus();
+    } catch (error) {
+      setLaunchStatus({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Could not launch mGBA.',
+      });
+    } finally {
+      setIsLaunchingMgba(false);
     }
   };
 
@@ -225,6 +253,7 @@ export const App = () => {
       setPatchError(null);
       setPatchSuccess(null);
       setExportStatus(null);
+      setLaunchStatus(null);
       await refreshStatus({ replaceLocalState: true });
     } finally {
       setIsResetting(false);
@@ -339,8 +368,11 @@ export const App = () => {
                   patchApplied={patchApplied}
                   mgbaReady={mgbaReady}
                   exportStatus={exportStatus}
+                  launchStatus={launchStatus}
+                  isLaunchingMgba={isLaunchingMgba}
                   onExportPatchedRom={exportPatchedRom}
                   onOpenPatchedRomFolder={openPatchedRomFolder}
+                  onLaunchMgba={launchMgba}
                   onSelectPatchedRomSetup={() => setScreen(sourceRomPath ? 'patch' : 'rom')}
                   onSelectMgbaSetup={() => setScreen('mgba')}
                 />

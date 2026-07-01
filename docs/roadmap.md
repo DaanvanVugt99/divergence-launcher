@@ -25,7 +25,7 @@
 - Detect mGBA.
 - Let the user manually select mGBA.
 - Save selected path.
-- Launch mGBA with the patched ROM.
+- Launch externally installed mGBA with the verified patched ROM.
 - Handle missing executable and launch failures cleanly.
 
 ## v0.4 Packaging

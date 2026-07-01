@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronRight, CircleAlert, ExternalLink, FolderOpen, Play, Save } from 'lucide-react';
+import { CheckCircle2, ChevronRight, CircleAlert, ExternalLink, FolderOpen, Loader2, Play, Save } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,11 @@ interface PlayScreenProps {
   patchApplied: boolean;
   mgbaReady: boolean;
   exportStatus: string | null;
+  launchStatus: { type: 'success' | 'error'; message: string } | null;
+  isLaunchingMgba: boolean;
   onExportPatchedRom: () => void;
   onOpenPatchedRomFolder: () => void;
+  onLaunchMgba: () => void;
   onSelectPatchedRomSetup: () => void;
   onSelectMgbaSetup: () => void;
 }
@@ -30,8 +33,11 @@ export const PlayScreen = ({
   patchApplied,
   mgbaReady,
   exportStatus,
+  launchStatus,
+  isLaunchingMgba,
   onExportPatchedRom,
   onOpenPatchedRomFolder,
+  onLaunchMgba,
   onSelectPatchedRomSetup,
   onSelectMgbaSetup,
 }: PlayScreenProps) => {
@@ -83,6 +89,14 @@ export const PlayScreen = ({
             <Save className="h-4 w-4" />
             <AlertTitle>Export</AlertTitle>
             <AlertDescription>{exportStatus}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {launchStatus ? (
+          <Alert variant={launchStatus.type === 'error' ? 'destructive' : 'default'}>
+            {launchStatus.type === 'error' ? <CircleAlert className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+            <AlertTitle>{launchStatus.type === 'error' ? 'Launch failed' : 'mGBA launched'}</AlertTitle>
+            <AlertDescription className="break-all">{launchStatus.message}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -155,9 +169,9 @@ export const PlayScreen = ({
             <Save className="h-4 w-4" />
             Export ROM
           </Button>
-          <Button type="button" variant="outline" disabled className="gap-2">
-            <ExternalLink className="h-4 w-4" />
-            Launch mGBA
+          <Button type="button" variant="default" onClick={onLaunchMgba} disabled={!readyForNativePlay || isLaunchingMgba} className="gap-2">
+            {isLaunchingMgba ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+            {isLaunchingMgba ? 'Launching...' : 'Launch mGBA'}
           </Button>
         </div>
       </CardFooter>

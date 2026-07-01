@@ -17,7 +17,7 @@ The xdelta patch artifact must not contain or reconstruct a base ROM by itself.
 
 ## mGBA
 
-v0.1 assumes mGBA is installed externally. The launcher may detect common install locations or ask the user to select the executable.
+The launcher assumes mGBA is installed externally. It may detect common install locations or ask the user to select the executable.
 
 mGBA is MPL-2.0 licensed. Bundling may be possible later, but it requires explicit license compliance, notices, packaging work, and an update policy.
 

@@ -46,7 +46,7 @@ export const MgbaSetupScreen = ({
         <div className="rounded-md border bg-muted/40 p-4">
           <div className="text-sm font-medium">Distribution policy</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            The launcher detects or asks for mGBA in v0.2. Bundling mGBA is kept out of the default path until license and packaging work is explicit.
+            The launcher uses an externally installed mGBA build. Bundling mGBA is kept out of the default path until license and packaging work is explicit.
           </p>
         </div>
       </CardContent>

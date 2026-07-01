@@ -6,6 +6,7 @@ import { applyPatch, getPatchMetadata, getPatchPlan, verifySourceRom } from './r
 import { getManagedPatchedRomPath, getRomLibraryState } from './rom/romLibrary';
 import { sha256File } from './rom/hash';
 import { detectMgba, resolveMgbaExecutablePath } from './emulator/mgbaDetector';
+import { createMgbaLaunchRequest, launchMgba } from './emulator/mgbaLauncher';
 import { getSettingsSnapshot, updateSettings, writeSettings } from './settings/settingsStore';
 
 export const registerIpcHandlers = () => {
@@ -148,6 +149,24 @@ export const registerIpcHandlers = () => {
 
     fs.mkdirSync(path.dirname(romLibrary.patchedRomPath), { recursive: true });
     await shell.openPath(path.dirname(romLibrary.patchedRomPath));
+  });
+
+  ipcMain.handle('launcher:launchMgba', async () => {
+    const paths = getLauncherPaths();
+    const settings = getSettingsSnapshot();
+    const metadata = getPatchMetadata(paths);
+    const romLibrary = await getRomLibraryState(paths, metadata, settings);
+    const mgba = await detectMgba(settings.mgbaPath, {
+      allowCommonLocations: !settings.suppressMgbaAutoDetect,
+    });
+
+    return launchMgba(
+      createMgbaLaunchRequest({
+        mgba,
+        romLibrary,
+        expectedPatchedSha256: metadata.patchedRom.sha256,
+      }),
+    );
   });
 
   ipcMain.handle('launcher:selectMgba', async () => {

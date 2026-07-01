@@ -78,6 +78,12 @@ export interface PatchResult {
   patchVersion: string;
 }
 
+export interface MgbaLaunchResult {
+  mgbaPath: string;
+  romPath: string;
+  startedAt: string;
+}
+
 export interface FileSelectionResult {
   path: string;
 }
@@ -91,6 +97,7 @@ export interface LauncherApi {
   openPatchedRomFolder: () => Promise<void>;
   resetData: () => Promise<void>;
   selectMgba: () => Promise<FileSelectionResult | null>;
+  launchMgba: () => Promise<MgbaLaunchResult>;
   openExternal: (url: string) => Promise<void>;
 }
 

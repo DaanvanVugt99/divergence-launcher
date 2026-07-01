@@ -23,7 +23,11 @@ The launcher performs ROM verification and patching entirely in the main process
 
 The local xdelta runtime is provided by `@chainsafe/xdelta3-node`. Packaged builds copy the current platform native addon into `resources/xdelta/native` during `npm run package`, then load it from Electron resources if `node_modules` is not present.
 
-Native mGBA launch remains a later milestone.
+## v0.3 mGBA Launch
+
+The launcher still assumes mGBA is installed externally. The main process detects or resolves the executable path, verifies the managed patched ROM hash, then starts mGBA with the patched ROM path as its only argument.
+
+Launches are fire-and-forget. After mGBA starts successfully, it runs independently from the launcher.
 
 ## Future Mailbox Model
 

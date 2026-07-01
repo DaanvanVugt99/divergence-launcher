@@ -10,6 +10,7 @@ const launcherApi: LauncherApi = {
   openPatchedRomFolder: () => ipcRenderer.invoke('launcher:openPatchedRomFolder'),
   resetData: () => ipcRenderer.invoke('launcher:resetData'),
   selectMgba: () => ipcRenderer.invoke('launcher:selectMgba'),
+  launchMgba: () => ipcRenderer.invoke('launcher:launchMgba'),
   openExternal: (url: string) => ipcRenderer.invoke('launcher:openExternal', url),
 };
 
