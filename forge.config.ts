@@ -17,24 +17,11 @@ const macEntitlementsPath = path.resolve(process.cwd(), 'resources/entitlements/
 const productName = 'Divergence Launcher';
 const macSigningIdentity = process.env.APPLE_SIGNING_IDENTITY;
 const macSigningKeychain = process.env.APPLE_KEYCHAIN_PATH;
-const appleApiKey = process.env.APPLE_API_KEY_PATH;
-const appleApiKeyId = process.env.APPLE_API_KEY_ID;
-const appleApiIssuer = process.env.APPLE_API_ISSUER;
 const enableElectronFuses = process.env.ENABLE_ELECTRON_FUSES === 'true';
 
 function getMacSigningConfig() {
   if (!macSigningIdentity) {
     return {};
-  }
-
-  const notarizationValues = [appleApiKey, appleApiKeyId, appleApiIssuer];
-  const hasPartialNotarization =
-    notarizationValues.some(Boolean) && !notarizationValues.every(Boolean);
-
-  if (hasPartialNotarization) {
-    throw new Error(
-      'Apple notarization is partially configured. Set APPLE_API_KEY_PATH, APPLE_API_KEY_ID, and APPLE_API_ISSUER together.',
-    );
   }
 
   return {
@@ -45,15 +32,6 @@ function getMacSigningConfig() {
       entitlements: macEntitlementsPath,
       continueOnError: false,
     },
-    ...(notarizationValues.every(Boolean)
-      ? {
-          osxNotarize: {
-            appleApiKey,
-            appleApiKeyId,
-            appleApiIssuer,
-          },
-        }
-      : {}),
   };
 }
 

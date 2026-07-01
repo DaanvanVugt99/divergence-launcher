@@ -16,8 +16,9 @@ npm run release:mac
 The generated app and ZIP are written under `out/`.
 
 `release:mac` runs the TypeScript check, unit tests, signing/notarization
-configuration check, macOS app packaging, deterministic ZIP creation with
-`ditto`, and the artifact verifier.
+configuration check, macOS app packaging, explicit notarization with visible
+status polling, deterministic ZIP creation with `ditto`, and the artifact
+verifier.
 
 ## Local Windows Build
 
@@ -179,6 +180,12 @@ npm run release:mac
 
 If the certificate is in a non-default keychain, also set
 `APPLE_KEYCHAIN_PATH` to that keychain path.
+
+The notarization script submits the packaged app, prints the Apple submission
+ID, polls status every 30 seconds, staples the accepted ticket to the app, and
+then the final ZIP is created from the stapled app. Override
+`NOTARY_TIMEOUT_MS` if Apple processing needs longer than the default 30
+minutes.
 
 ## Platform Notes
 
