@@ -403,15 +403,15 @@ export const App = () => {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="space-y-4">
-                    <div className="grid gap-2 rounded-md border p-4 text-sm">
+                  <div>
+                    <div className="mb-4 grid gap-2 rounded-md border p-4 text-sm">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-muted-foreground">Version</span>
                         <Badge variant="secondary">{status?.app.version ?? '0.1.0'}</Badge>
                       </div>
                     </div>
 
-                    <div className="rounded-md border p-4">
+                    <div className="mb-4 rounded-md border p-4">
                       <div className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-card">
                           <Minimize2 className="h-4 w-4 text-primary" />
@@ -428,7 +428,14 @@ export const App = () => {
                       </div>
                     </div>
 
-                    {minimizeLauncherOnGameLaunch ? (
+                    <div
+                      aria-hidden={!minimizeLauncherOnGameLaunch}
+                      className={
+                        minimizeLauncherOnGameLaunch
+                          ? 'mb-4 max-h-24 translate-y-0 overflow-hidden opacity-100 transition-all duration-200 ease-out'
+                          : 'mb-0 max-h-0 -translate-y-1 overflow-hidden opacity-0 transition-all duration-200 ease-out'
+                      }
+                    >
                       <div className="rounded-md border p-4">
                         <div className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-card">
@@ -439,15 +446,15 @@ export const App = () => {
                           </div>
                           <Switch
                             checked={restoreLauncherOnGameExit}
-                            disabled={isSavingSettings}
+                            disabled={!minimizeLauncherOnGameLaunch || isSavingSettings}
                             onCheckedChange={updateRestoreOnGameExit}
                             aria-label="Restore launcher after mGBA closes"
                           />
                         </div>
                       </div>
-                    ) : null}
+                    </div>
 
-                    <div className="rounded-md border p-4">
+                    <div className="mb-4 rounded-md border p-4">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex min-w-0 gap-3">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-card">
